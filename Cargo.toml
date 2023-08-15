@@ -1,0 +1,11 @@
+[workspace]
+resolver = "2"
+members = [
+    "client",
+    "server",
+    "shared",
+    "state"
+]
+
+[workspace.dependencies]
+gyg-eventsource = {git= "https://github.com/galakhygame/gyg-eventsource", branch = "ergonomics"}
