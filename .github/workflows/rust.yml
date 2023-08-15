@@ -14,6 +14,7 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: beta
+          components: clippy
 #      - name: Run tests
 #        run: cargo test --verbose
       - name: Run clippy
