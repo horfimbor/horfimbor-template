@@ -1,20 +1,23 @@
 [package]
-name = "state"
+name = "template-state"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-shared = { path = "../shared" }
+gyg-eventsource = { workspace = true }
+serde = { workspace = true }
+template-shared = { path = "../shared" }
 
 
 
 [dev-dependencies]
-tokio = "1.21"
+tokio = { version = "1.21" , features = ["rt", "rt-multi-thread", "macros"]}
 async-trait = "0.1"
 cucumber = { version = "0.20.0" }
+anyhow= "1.0"
 
 [[test]]
-name = "state" # this should be the same as the filename of your test target
+name = "template-state-test" # this should be the same as the filename of your test target
 harness = false  # allows Cucumber to print output instead of libtest

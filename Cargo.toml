@@ -9,3 +9,6 @@ members = [
 
 [workspace.dependencies]
 gyg-eventsource = {git= "https://github.com/galakhygame/gyg-eventsource", branch = "ergonomics"}
+rocket = { version = "0.5.0-rc.3", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+thiserror = "1.0"
