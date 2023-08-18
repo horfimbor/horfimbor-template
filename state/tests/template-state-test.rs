@@ -1,9 +1,9 @@
-use template_state::TemplateState;
 use cucumber::{given, then, when, World};
 use gyg_eventsource::State;
 use template_shared::command::TemplateCommand::*;
 use template_shared::error::TemplateError;
 use template_shared::event::TemplateEvent;
+use template_state::TemplateState;
 
 #[derive(World, Debug, Default)]
 pub struct TemplateWorld {
@@ -27,12 +27,12 @@ fn reset_template(world: &mut TemplateWorld) {
 }
 
 #[then(regex = r"^it got a value of (\d+)$")]
-fn result(world: &mut TemplateWorld, nb: usize){
+fn result(world: &mut TemplateWorld, nb: usize) {
     assert_eq!(nb, world.model.get_value())
 }
 
 #[then(regex = r"^it got a error$")]
-fn error(world: &mut TemplateWorld){
+fn error(world: &mut TemplateWorld) {
     assert!(world.err.is_some())
 }
 
@@ -43,9 +43,7 @@ fn play_result(world: &mut TemplateWorld, events: Result<Vec<TemplateEvent>, Tem
                 world.model.play_event(&e);
             }
         }
-        Err(e) => {
-            world.err = Some(e)
-        }
+        Err(e) => world.err = Some(e),
     }
 }
 

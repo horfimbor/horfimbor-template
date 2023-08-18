@@ -1,47 +1,55 @@
+mod controller;
+
 #[macro_use]
 extern crate rocket;
 
-use std::marker::PhantomData;
+use anyhow::{Context, Result};
+use eventstore::Client;
 use gyg_eventsource::model_key::ModelKey;
 use gyg_eventsource::repository::EventRepository;
-use gyg_eventsource::State;
 use gyg_eventsource::state_db::{StateDb, StateDbError};
+use gyg_eventsource::State;
 use rocket::fs::{relative, FileServer};
+use rocket::response::content::RawHtml;
+use std::marker::PhantomData;
+use template_state::TemplateState;
 
-type EasyNoCache = NoCache<TemplateState>;
+use crate::controller::{state, template_command};
 
-#[launch]
-fn rocket() -> _ {
+type TemplateNoCache = NoCache<TemplateState>;
+type TemplateRepository = EventRepository<TemplateNoCache, TemplateState>;
+
+#[rocket::main]
+async fn main() -> Result<()> {
+    let settings = "esdb://admin:changeit@localhost:2113?tls=false&tlsVerifyCert=false"
+        .to_string()
+        .parse()
+        .context("fail to parse the settings")?;
+
+    let event_store_db = Client::new(settings).context("fail to connect to eventstore db")?;
+
+    let repo = EventRepository::new(event_store_db, TemplateNoCache::new());
+
     let figment = rocket::Config::figment().merge(("port", 8000));
-
-
-    let repo = EventRepository::new(get_event_db(), EasyNoCache::new());
-
-    rocket::custom(figment)
+    let _rocket = rocket::custom(figment)
         .manage(repo)
+        .mount("/api", routes![template_command, state])
         .mount("/", FileServer::from(relative!("web")))
         .register("/", catchers![general_not_found])
+        .launch()
+        .await;
+
+    Ok(())
 }
 
-
-
 #[catch(404)]
-fn general_not_found() -> content::RawHtml<&'static str> {
-    content::RawHtml(
+fn general_not_found() -> RawHtml<&'static str> {
+    RawHtml(
         r#"
         <p>Hmm... This is not the droïd you are looking for</p>
     "#,
     )
 }
-
-fn get_event_db() -> Client {
-    let settings = "esdb://admin:changeit@localhost:2113?tls=false&tlsVerifyCert=false"
-        .to_string()
-        .parse()
-        .unwrap();
-    EventClient::new(settings).unwrap()
-}
-
 
 #[derive(Clone)]
 pub struct NoCache<S> {
@@ -61,8 +69,8 @@ impl<S> Default for NoCache<S> {
 }
 
 impl<S> StateDb<S> for NoCache<S>
-    where
-        S: State,
+where
+    S: State,
 {
     fn get_from_db(&self, _key: &ModelKey) -> Result<Option<String>, StateDbError> {
         Ok(None)

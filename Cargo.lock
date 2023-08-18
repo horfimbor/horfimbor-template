@@ -2269,11 +2269,16 @@ version = "0.1.0"
 name = "template-server"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "eventstore",
  "gyg-eventsource",
  "rocket",
  "serde",
  "serde_json",
  "template-shared",
+ "template-state",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
