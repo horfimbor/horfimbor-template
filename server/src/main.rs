@@ -5,19 +5,22 @@ extern crate rocket;
 
 use anyhow::{Context, Result};
 use eventstore::Client;
+use gyg_eventsource::cache_db::{CacheDb, CacheDbError};
 use gyg_eventsource::model_key::ModelKey;
-use gyg_eventsource::repository::EventRepository;
-use gyg_eventsource::state_db::{StateDb, StateDbError};
-use gyg_eventsource::State;
+use gyg_eventsource::repository::{DtoRepository, Repository, StateRepository};
+use gyg_eventsource::{Dto, State};
 use rocket::fs::{relative, FileServer};
 use rocket::response::content::RawHtml;
 use std::marker::PhantomData;
+use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
 use crate::controller::{state, template_command};
 
-type TemplateNoCache = NoCache<TemplateState>;
-type TemplateRepository = EventRepository<TemplateNoCache, TemplateState>;
+type TemplateStateNoCache = NoCache<TemplateState>;
+type TemplateRepository = StateRepository<TemplateState, TemplateStateNoCache>;
+type TemplateDtoNoCache = DtoNoCache<TemplateDto>;
+type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoNoCache>;
 
 #[rocket::main]
 async fn main() -> Result<()> {
@@ -28,11 +31,14 @@ async fn main() -> Result<()> {
 
     let event_store_db = Client::new(settings).context("fail to connect to eventstore db")?;
 
-    let repo = EventRepository::new(event_store_db, TemplateNoCache::new());
+    let repo_state = TemplateRepository::new(event_store_db.clone(), TemplateStateNoCache::new());
+
+    let repo_dto = TemplateDtoRepository::new(event_store_db, TemplateDtoNoCache::new());
 
     let figment = rocket::Config::figment().merge(("port", 8000));
     let _rocket = rocket::custom(figment)
-        .manage(repo)
+        .manage(repo_state)
+        .manage(repo_dto)
         .mount("/api", routes![template_command, state])
         .mount("/", FileServer::from(relative!("web")))
         .register("/", catchers![general_not_found])
@@ -68,15 +74,47 @@ impl<S> Default for NoCache<S> {
     }
 }
 
-impl<S> StateDb<S> for NoCache<S>
+impl<S> CacheDb<S> for NoCache<S>
 where
     S: State,
 {
-    fn get_from_db(&self, _key: &ModelKey) -> Result<Option<String>, StateDbError> {
+    fn get_from_db(&self, _key: &ModelKey) -> Result<Option<String>, CacheDbError> {
         Ok(None)
     }
 
-    fn set_in_db(&self, _key: &ModelKey, _state: String) -> Result<(), StateDbError> {
+    fn set_in_db(&self, _key: &ModelKey, _state: String) -> Result<(), CacheDbError> {
         Ok(())
+    }
+}
+
+
+
+#[derive(Clone)]
+pub struct DtoNoCache<S> {
+    state: PhantomData<S>,
+}
+
+impl<S> DtoNoCache<S> {
+    pub fn new() -> Self {
+        Self { state: PhantomData }
+    }
+}
+
+impl<S> Default for DtoNoCache<S> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<S> CacheDb<S> for DtoNoCache<S>
+    where
+        S: Dto,
+{
+    fn get_from_db(&self, _key: &ModelKey) -> Result<Option<String>, CacheDbError> {
+        Ok(None)
+    }
+
+    fn set_in_db(&self, _key: &ModelKey, _state: String) -> Result<(), CacheDbError> {
+        Err(CacheDbError::Internal("Not allowed for dto".to_string()))
     }
 }

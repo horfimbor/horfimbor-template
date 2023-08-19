@@ -1,8 +1,9 @@
-use gyg_eventsource::serde::{Deserialize, Serialize};
-use gyg_eventsource::{State, StateName};
+use gyg_eventsource::{Dto, State};
+use serde::{Deserialize, Serialize};
 use template_shared::command::TemplateCommand;
 use template_shared::error::TemplateError;
 use template_shared::event::TemplateEvent;
+use template_shared::START_VALUE;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct TemplateState {
@@ -17,18 +18,13 @@ impl TemplateState {
 
 impl Default for TemplateState {
     fn default() -> Self {
-        TemplateState { value: 1337 }
+        TemplateState { value: START_VALUE }
     }
 }
 
-impl State for TemplateState {
+impl Dto for TemplateState {
     type Event = TemplateEvent;
-    type Command = TemplateCommand;
     type Error = TemplateError;
-
-    fn name_prefix() -> StateName {
-        "Template"
-    }
 
     fn play_event(&mut self, event: &Self::Event) {
         match event {
@@ -36,6 +32,10 @@ impl State for TemplateState {
             TemplateEvent::Removed(i) => self.value -= i,
         }
     }
+}
+
+impl State for TemplateState {
+    type Command = TemplateCommand;
 
     fn try_command(&self, command: Self::Command) -> Result<Vec<Self::Event>, Self::Error> {
         match command {

@@ -9,3 +9,4 @@ edition = "2021"
 gyg-eventsource = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+rocket = { workspace=true }

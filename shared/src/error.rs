@@ -1,4 +1,4 @@
-use gyg_eventsource::serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use thiserror::Error;
 
