@@ -1,7 +1,11 @@
+#[cfg(feature = "server")]
+use gyg_eventsource::Dto;
+
+#[cfg(feature = "server")]
 use crate::error::TemplateError;
+
 use crate::event::TemplateEvent;
 use crate::START_VALUE;
-use gyg_eventsource::Dto;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
@@ -19,11 +23,14 @@ impl Default for TemplateDto {
     }
 }
 
-impl Dto for TemplateDto {
-    type Event = TemplateEvent;
-    type Error = TemplateError;
-
-    fn play_event(&mut self, event: &Self::Event) {
+impl TemplateDto {
+    pub fn empty() -> Self {
+        TemplateDto {
+            last_ten: vec![],
+            average: 0.0,
+        }
+    }
+    pub fn play_event(&mut self, event: &TemplateEvent) {
         self.last_ten.push(event.clone());
         if self.last_ten.len() > 10 {
             self.last_ten.remove(0);
@@ -36,5 +43,21 @@ impl Dto for TemplateDto {
             }
         }
         self.average = sum as f32 / self.last_ten.len() as f32;
+    }
+    pub fn last_ten(&self) -> &Vec<TemplateEvent> {
+        &self.last_ten
+    }
+    pub fn average(&self) -> f32 {
+        self.average
+    }
+}
+
+#[cfg(feature = "server")]
+impl Dto for TemplateDto {
+    type Event = TemplateEvent;
+    type Error = TemplateError;
+
+    fn play_event(&mut self, event: &Self::Event) {
+        self.play_event(event)
     }
 }

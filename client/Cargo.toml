@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 sycamore = "0.9.0-beta.1"
+template-shared = { path = "../shared" }

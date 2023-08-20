@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 gyg-eventsource = { workspace = true }
 serde = { workspace = true }
-template-shared = { path = "../shared" }
+template-shared = { path = "../shared", features = ["server"] }
 
 
 

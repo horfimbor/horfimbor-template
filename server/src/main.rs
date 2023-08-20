@@ -10,7 +10,9 @@ use gyg_eventsource::model_key::ModelKey;
 use gyg_eventsource::repository::{DtoRepository, Repository, StateRepository};
 use gyg_eventsource::{Dto, State};
 use rocket::fs::{relative, FileServer};
+use rocket::http::Method;
 use rocket::response::content::RawHtml;
+use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use std::marker::PhantomData;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
@@ -35,12 +37,29 @@ async fn main() -> Result<()> {
 
     let repo_dto = TemplateDtoRepository::new(event_store_db, TemplateDtoNoCache::new());
 
+    let cors = rocket_cors::CorsOptions {
+        allowed_origins: AllowedOrigins::some_exact(&[
+            "http://127.0.0.1:8080",
+            "http://localhost:8080",
+        ]),
+        allowed_methods: vec![Method::Get, Method::Post]
+            .into_iter()
+            .map(From::from)
+            .collect(),
+        allowed_headers: AllowedHeaders::all(),
+        allow_credentials: true,
+        ..Default::default()
+    }
+    .to_cors()
+    .context("fail to create cors")?;
+
     let figment = rocket::Config::figment().merge(("port", 8000));
     let _rocket = rocket::custom(figment)
         .manage(repo_state)
         .manage(repo_dto)
         .mount("/api", routes![template_command, state])
         .mount("/", FileServer::from(relative!("web")))
+        .attach(cors)
         .register("/", catchers![general_not_found])
         .launch()
         .await;
@@ -87,8 +106,6 @@ where
     }
 }
 
-
-
 #[derive(Clone)]
 pub struct DtoNoCache<S> {
     state: PhantomData<S>,
@@ -107,8 +124,8 @@ impl<S> Default for DtoNoCache<S> {
 }
 
 impl<S> CacheDb<S> for DtoNoCache<S>
-    where
-        S: Dto,
+where
+    S: Dto,
 {
     fn get_from_db(&self, _key: &ModelKey) -> Result<Option<String>, CacheDbError> {
         Ok(None)
