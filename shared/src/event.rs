@@ -11,3 +11,15 @@ pub enum TemplateEvent {
     Added(usize),
     Removed(usize),
 }
+
+impl ToString for TemplateEvent{
+    fn to_string(&self) -> String {
+        match self {
+            TemplateEvent::Added(n) => {
+                format!("+{}",n)
+            }
+            TemplateEvent::Removed(n) => {
+                format!("-{}",n)}
+        }
+    }
+}

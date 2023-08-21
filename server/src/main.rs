@@ -17,7 +17,7 @@ use std::marker::PhantomData;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
-use crate::controller::{state, template_command};
+use crate::controller::{state, template_command, index};
 
 type TemplateStateNoCache = NoCache<TemplateState>;
 type TemplateRepository = StateRepository<TemplateState, TemplateStateNoCache>;
@@ -57,6 +57,7 @@ async fn main() -> Result<()> {
     let _rocket = rocket::custom(figment)
         .manage(repo_state)
         .manage(repo_dto)
+        .mount("/", routes![index])
         .mount("/api", routes![template_command, state])
         .mount("/", FileServer::from(relative!("web")))
         .attach(cors)
