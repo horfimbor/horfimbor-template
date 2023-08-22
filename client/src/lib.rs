@@ -1,12 +1,11 @@
-
 mod template;
 
+use crate::template::Template;
 use custom_elements::CustomElement;
 use wasm_bindgen::prelude::*;
 use web_sys::HtmlElement;
 use weblog::console_info;
 use yew::AppHandle;
-use crate::template::Template;
 
 #[derive(Default)]
 struct ComponentWrapper {

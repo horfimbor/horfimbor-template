@@ -5,24 +5,21 @@ extern crate rocket;
 
 use anyhow::{Context, Result};
 use eventstore::Client;
-use gyg_eventsource::cache_db::{CacheDb, CacheDbError};
-use gyg_eventsource::model_key::ModelKey;
+use gyg_eventsource::cache_db::redis::RedisStateDb;
 use gyg_eventsource::repository::{DtoRepository, Repository, StateRepository};
-use gyg_eventsource::{Dto, State};
 use rocket::fs::{relative, FileServer};
 use rocket::http::Method;
 use rocket::response::content::RawHtml;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
-use std::marker::PhantomData;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
-use crate::controller::{state, template_command, index};
+use crate::controller::{index, state, template_command};
 
-type TemplateStateNoCache = NoCache<TemplateState>;
-type TemplateRepository = StateRepository<TemplateState, TemplateStateNoCache>;
-type TemplateDtoNoCache = DtoNoCache<TemplateDto>;
-type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoNoCache>;
+type TemplateStateCache = RedisStateDb<TemplateState>;
+type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;
+type TemplateDtoCache = RedisStateDb<TemplateDto>;
+type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
 
 #[rocket::main]
 async fn main() -> Result<()> {
@@ -33,14 +30,20 @@ async fn main() -> Result<()> {
 
     let event_store_db = Client::new(settings).context("fail to connect to eventstore db")?;
 
-    let repo_state = TemplateRepository::new(event_store_db.clone(), TemplateStateNoCache::new());
+    let redis_client = redis::Client::open("redis://localhost:6379/").unwrap();
 
-    let repo_dto = TemplateDtoRepository::new(event_store_db, TemplateDtoNoCache::new());
+    let repo_state = TemplateRepository::new(
+        event_store_db.clone(),
+        TemplateStateCache::new(redis_client.clone()),
+    );
+
+    let repo_dto =
+        TemplateDtoRepository::new(event_store_db, TemplateDtoCache::new(redis_client.clone()));
 
     let cors = rocket_cors::CorsOptions {
         allowed_origins: AllowedOrigins::some_exact(&[
-            "http://127.0.0.1:8080",
-            "http://localhost:8080",
+            "http://127.0.0.1:8000",
+            "http://localhost:8000",
         ]),
         allowed_methods: vec![Method::Get, Method::Post]
             .into_iter()
@@ -72,67 +75,7 @@ async fn main() -> Result<()> {
 fn general_not_found() -> RawHtml<&'static str> {
     RawHtml(
         r#"
-        <p>Hmm... This is not the droïd you are looking for</p>
+        <p>Hmm... This is not the droïd you are looking for, oupsi</p>
     "#,
     )
-}
-
-#[derive(Clone)]
-pub struct NoCache<S> {
-    state: PhantomData<S>,
-}
-
-impl<S> NoCache<S> {
-    pub fn new() -> Self {
-        Self { state: PhantomData }
-    }
-}
-
-impl<S> Default for NoCache<S> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<S> CacheDb<S> for NoCache<S>
-where
-    S: State,
-{
-    fn get_from_db(&self, _key: &ModelKey) -> Result<Option<String>, CacheDbError> {
-        Ok(None)
-    }
-
-    fn set_in_db(&self, _key: &ModelKey, _state: String) -> Result<(), CacheDbError> {
-        Ok(())
-    }
-}
-
-#[derive(Clone)]
-pub struct DtoNoCache<S> {
-    state: PhantomData<S>,
-}
-
-impl<S> DtoNoCache<S> {
-    pub fn new() -> Self {
-        Self { state: PhantomData }
-    }
-}
-
-impl<S> Default for DtoNoCache<S> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<S> CacheDb<S> for DtoNoCache<S>
-where
-    S: Dto,
-{
-    fn get_from_db(&self, _key: &ModelKey) -> Result<Option<String>, CacheDbError> {
-        Ok(None)
-    }
-
-    fn set_in_db(&self, _key: &ModelKey, _state: String) -> Result<(), CacheDbError> {
-        Err(CacheDbError::Internal("Not allowed for dto".to_string()))
-    }
 }

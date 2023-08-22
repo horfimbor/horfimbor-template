@@ -23,18 +23,12 @@ services:
         source: eventstore-volume-logs
         target: /var/log/eventstore
 
-  surrealdb:
-    image: surrealdb/surrealdb:latest
+  redis:
+    image: redis:7.0
     ports:
-      - "8000:8000"
-    volumes:
-      - type: volume
-        source: surrealdb-volume-data
-        target: /mydata
-    command: start --user root --pass root file:/mydata/mydatabase.db
+      - "6379:6379"
 
 
 volumes:
   eventstore-volume-data:
   eventstore-volume-logs:
-  surrealdb-volume-data:

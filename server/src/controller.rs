@@ -1,10 +1,10 @@
 use crate::{TemplateDtoRepository, TemplateRepository};
 use gyg_eventsource::model_key::ModelKey;
 use gyg_eventsource::repository::Repository;
-use rocket::http::{ Cookie, CookieJar};
-use rocket::serde::json::Json;
-use rocket::{ State};
+use rocket::http::{Cookie, CookieJar};
 use rocket::response::content::RawHtml;
+use rocket::serde::json::Json;
+use rocket::State;
 use template_shared::command::TemplateCommand;
 use template_shared::dto::TemplateDto;
 use uuid::Uuid;
@@ -55,23 +55,22 @@ pub async fn state(
     Ok(Json(state.state().clone()))
 }
 
-
-
 #[get("/")]
-pub async fn index() -> RawHtml<&'static str> {  // <- request handler
+pub async fn index() -> RawHtml<&'static str> {
+    // <- request handler
     RawHtml(
-    r#"<body>
-    <gyg-template></gyg-template>
-    <gyg-template></gyg-template>
-    <gyg-template></gyg-template>
-    <script type="module">
-    import init, { run } from './template/index.js';
-    async function main() {
-        await init();
-        run();
-    }
-    main();
-    </script>
-    </body>"#
+        r#"<body>
+        <gyg-template></gyg-template>
+        <gyg-template></gyg-template>
+        <gyg-template></gyg-template>
+        <script type="module">
+        import init, { run } from './template/index.js';
+        async function main() {
+            await init();
+            run();
+        }
+        main();
+        </script>
+        </body>"#,
     )
 }
