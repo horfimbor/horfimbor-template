@@ -1,32 +1,27 @@
-use web_sys::HtmlInputElement;
-use yew::prelude::*;
-use bounce::{use_atom, Atom, use_atom_value};
 use bounce::BounceRoot;
+use bounce::{use_atom, use_atom_value, Atom};
 use reqwasm::http::Request;
+use template_shared::command::TemplateCommand;
+use web_sys::HtmlInputElement;
 use weblog::console_info;
 use yew::platform::spawn_local;
-use template_shared::command::TemplateCommand;
+use yew::prelude::*;
 
 // API that counts visits to the web-page
 const API_BASE_URL: &str = "http://localhost:8000/api/";
-
 
 #[derive(Eq, PartialEq, Atom)]
 struct LocalData {
     nb: usize,
 }
 
-impl Default for LocalData{
+impl Default for LocalData {
     fn default() -> Self {
-        Self{
-            nb: 42,
-        }
+        Self { nb: 42 }
     }
 }
 
-
 pub struct Template {}
-
 
 #[function_component(LocalDataSetter)]
 fn local_data_setter() -> Html {
@@ -38,7 +33,9 @@ fn local_data_setter() -> Html {
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();
 
-            data.set(LocalData { nb: input.value().parse().unwrap() });
+            data.set(LocalData {
+                nb: input.value().parse().unwrap(),
+            });
         })
     };
 
@@ -54,7 +51,6 @@ fn sender() -> Html {
     let data = use_atom_value::<LocalData>();
 
     let on_send_clicked = Callback::from(move |_| {
-
         let cmd = TemplateCommand::Add(data.nb);
 
         spawn_local(async move {
@@ -69,7 +65,6 @@ fn sender() -> Html {
                 console_info!("reset !");
             }
         });
-
     });
 
     html! { <button id="btn-reset" onclick={on_send_clicked}>{"Send"}</button> }
@@ -77,10 +72,8 @@ fn sender() -> Html {
 
 #[function_component(Resetter)]
 fn resetter() -> Html {
-
     let on_reset_clicked = Callback::from(move |_| {
         spawn_local(async move {
-
             let cmd = TemplateCommand::Reset;
 
             let resp = Request::post(API_BASE_URL)
@@ -94,7 +87,6 @@ fn resetter() -> Html {
                 console_info!("reset !");
             }
         });
-
     });
 
     html! { <button id="btn-reset" onclick={on_reset_clicked}>{"Reset"}</button> }
@@ -109,7 +101,6 @@ impl Component for Template {
     }
 
     fn view(&self, _ctx: &Context<Self>) -> Html {
-
         html! {
             <BounceRoot>
                 <p>
