@@ -1,6 +1,5 @@
-use crate::{TemplateDtoRepository, TemplateRepository};
+use crate::{TemplateDtoCache, TemplateRepository, STREAM_NAME};
 use gyg_eventsource::model_key::ModelKey;
-use gyg_eventsource::repository::Repository;
 use rocket::http::{Cookie, CookieJar};
 use rocket::response::content::RawHtml;
 use rocket::serde::json::Json;
@@ -8,6 +7,7 @@ use rocket::State;
 use template_shared::command::TemplateCommand;
 use template_shared::dto::TemplateDto;
 use uuid::Uuid;
+use gyg_eventsource::cache_db::CacheDb;
 
 #[post("/", format = "json", data = "<command>")]
 pub async fn template_command(
@@ -30,11 +30,9 @@ pub async fn template_command(
     Ok(())
 }
 
-const STREAM_NAME: &str = "template";
-
 #[get("/data")]
-pub async fn state(
-    state_repository: &State<TemplateDtoRepository>,
+pub async fn cached_dto(
+    dto_redis: &State<TemplateDtoCache>,
     cookies: &CookieJar<'_>,
 ) -> Result<Json<TemplateDto>, String> {
     let uuid = match cookies.get("uuid") {
@@ -47,9 +45,7 @@ pub async fn state(
     };
 
     let key = ModelKey::new(STREAM_NAME.to_string(), uuid);
-    let state = state_repository
-        .get_model(&key)
-        .await
+    let state = dto_redis.get(&key)
         .map_err(|e| e.to_string())?;
 
     Ok(Json(state.state().clone()))
