@@ -1,13 +1,13 @@
 use crate::{TemplateDtoCache, TemplateRepository, STREAM_NAME};
+use chrono::prelude::*;
+use gyg_eventsource::cache_db::CacheDb;
 use gyg_eventsource::model_key::ModelKey;
 use rocket::http::{Cookie, CookieJar};
-use rocket::response::content::RawHtml;
 use rocket::serde::json::Json;
 use rocket::State;
+use rocket_dyn_templates::{context, Template};
 use template_shared::command::TemplateCommand;
-use template_shared::dto::TemplateDto;
 use uuid::Uuid;
-use gyg_eventsource::cache_db::CacheDb;
 
 #[post("/", format = "json", data = "<command>")]
 pub async fn template_command(
@@ -30,11 +30,11 @@ pub async fn template_command(
     Ok(())
 }
 
-#[get("/data")]
-pub async fn cached_dto(
+#[get("/data.html")]
+pub async fn cached_dto_html(
     dto_redis: &State<TemplateDtoCache>,
     cookies: &CookieJar<'_>,
-) -> Result<Json<TemplateDto>, String> {
+) -> Result<Template, String> {
     let uuid = match cookies.get("uuid") {
         None => {
             let uuid = Uuid::new_v4().to_string();
@@ -45,28 +45,23 @@ pub async fn cached_dto(
     };
 
     let key = ModelKey::new(STREAM_NAME.to_string(), uuid);
-    let state = dto_redis.get(&key)
-        .map_err(|e| e.to_string())?;
+    let dto = dto_redis.get(&key).map_err(|e| e.to_string())?;
 
-    Ok(Json(state.state().clone()))
+    Ok(Template::render(
+        "data",
+        context! {
+            dto: dto.state()
+        },
+    ))
 }
 
 #[get("/")]
-pub async fn index() -> RawHtml<&'static str> {
-    // <- request handler
-    RawHtml(
-        r#"<body>
-        <gyg-template></gyg-template>
-        <gyg-template></gyg-template>
-        <gyg-template></gyg-template>
-        <script type="module">
-        import init, { run } from './template/index.js';
-        async function main() {
-            await init();
-            run();
-        }
-        main();
-        </script>
-        </body>"#,
+pub async fn index() -> Template {
+    let local: DateTime<Local> = Local::now();
+    Template::render(
+        "index",
+        context! {
+            title: format!("Hello, world! {}",local.format("%x %T"))
+        },
     )
 }

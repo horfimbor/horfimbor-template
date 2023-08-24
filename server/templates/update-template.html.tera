@@ -1,0 +1,12 @@
+
+
+<gyg-template></gyg-template>
+
+<script type="module">
+import init, { run } from './template/index.js';
+async function main() {
+    await init();
+    run();
+}
+main();
+</script>

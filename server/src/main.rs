@@ -3,6 +3,7 @@ mod controller;
 #[macro_use]
 extern crate rocket;
 
+use crate::controller::{cached_dto_html, index, template_command};
 use anyhow::{Context, Result};
 use eventstore::Client;
 use gyg_eventsource::cache_db::redis::RedisStateDb;
@@ -12,10 +13,9 @@ use rocket::http::Method;
 use rocket::response::content::RawHtml;
 use rocket::tokio;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
+use rocket_dyn_templates::Template;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
-
-use crate::controller::{index, cached_dto, template_command};
 
 type TemplateStateCache = RedisStateDb<TemplateState>;
 type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;
@@ -67,14 +67,17 @@ async fn main() -> Result<()> {
     .to_cors()
     .context("fail to create cors")?;
 
-    let figment = rocket::Config::figment().merge(("port", 8000));
+    let figment = rocket::Config::figment()
+        .merge(("port", 8000))
+        .merge(("template_dir", "server/templates"));
     let _rocket = rocket::custom(figment)
         .manage(repo_state)
         .manage(dto_redis)
         .mount("/", routes![index])
-        .mount("/api", routes![template_command, cached_dto])
+        .mount("/api", routes![template_command, cached_dto_html])
         .mount("/", FileServer::from(relative!("web")))
         .attach(cors)
+        .attach(Template::fairing())
         .register("/", catchers![general_not_found])
         .launch()
         .await;

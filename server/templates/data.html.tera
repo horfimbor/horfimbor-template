@@ -1,0 +1,12 @@
+<div>
+Average : {{ dto.average }}
+<ul style="width:100px; text-align:right">
+{% for data in dto.last_ten %}
+  {% if data.0 == '-' %}
+    <li style="color:red;"> {{ data.0 }} {{ data.1 }}</li>
+  {% else %}
+    <li style="color:green"> {{ data.1 }}</li>
+  {% endif %}
+{% endfor %}
+</ul>
+</div>

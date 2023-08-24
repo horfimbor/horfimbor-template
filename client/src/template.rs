@@ -103,16 +103,15 @@ impl Component for Template {
     fn view(&self, _ctx: &Context<Self>) -> Html {
         html! {
             <BounceRoot>
-                <p>
+                <fieldset>
                     <div>
                         <LocalDataSetter />
                         <Sender />
                     </div>
-                    <hr/>
                     <div>
                         <Resetter />
                     </div>
-                </p>
+                </fieldset>
             </BounceRoot>
         }
     }

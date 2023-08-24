@@ -1,0 +1,12 @@
+<head>
+    <title>{{ title }}</title>
+</head>
+<body>
+{% include "update-template" %}
+<hr/>
+{% include "update-template" %}
+<hr/>
+{% include "update-template" %}
+
+
+</body>

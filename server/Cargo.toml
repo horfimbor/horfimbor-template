@@ -18,3 +18,8 @@ rocket = { workspace=true, features = ["json"] }
 rocket_cors = "0.6.0-alpha2"
 serde_json = { workspace = true }
 anyhow = "1.0"
+chrono = "0.4"
+
+[dependencies.rocket_dyn_templates]
+version = "0.1.0-rc.3"
+features = ["tera"]

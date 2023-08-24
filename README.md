@@ -28,7 +28,7 @@ cargo watch -w client -w shared -- wasm-pack build ./client --target web --out-d
 
 start the server :
 ```shell 
-cargo watch -w server -w shared -w state -i server/web/ -x "run -p template-server"
+cargo watch -w server -w shared -w state -i server/web/ -i server/templates -x "run -p template-server"
 ```
 
 
