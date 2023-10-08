@@ -21,7 +21,7 @@ pub async fn template_command(
         }
         Some(crumb) => crumb.to_string(),
     };
-    let key = ModelKey::new(STREAM_NAME.to_string(), uuid);
+    let key = ModelKey::new(STREAM_NAME, uuid);
     state_repository
         .add_command(&key, command.0, None)
         .await
@@ -44,7 +44,7 @@ pub async fn cached_dto_html(
         Some(crumb) => crumb.to_string(),
     };
 
-    let key = ModelKey::new(STREAM_NAME.to_string(), uuid);
+    let key = ModelKey::new(STREAM_NAME, uuid);
     let dto = dto_redis.get(&key).map_err(|e| e.to_string())?;
 
     Ok(Template::render(

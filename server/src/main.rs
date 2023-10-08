@@ -8,6 +8,7 @@ use anyhow::{Context, Result};
 use eventstore::Client;
 use gyg_eventsource::cache_db::redis::RedisStateDb;
 use gyg_eventsource::repository::{DtoRepository, Repository, StateRepository};
+use gyg_eventsource::Stream;
 use rocket::fs::{relative, FileServer};
 use rocket::http::Method;
 use rocket::response::content::RawHtml;
@@ -47,8 +48,8 @@ async fn main() -> Result<()> {
 
     tokio::spawn(async move {
         let repo_dto = repo_dto.clone();
-
-        repo_dto.listen(STREAM_NAME, GROUP_NAME).await.unwrap();
+        let stream = Stream::Stream(STREAM_NAME);
+        repo_dto.cache_dto(&stream, GROUP_NAME).await.unwrap();
     });
 
     let cors = rocket_cors::CorsOptions {

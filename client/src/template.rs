@@ -62,7 +62,7 @@ fn sender() -> Html {
                 .unwrap();
 
             if resp.ok() {
-                console_info!("reset !");
+                console_info!("sent !");
             }
         });
     });
