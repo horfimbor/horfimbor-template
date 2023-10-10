@@ -3,7 +3,7 @@ mod controller;
 #[macro_use]
 extern crate rocket;
 
-use crate::controller::{cached_dto_html, index, template_command};
+use crate::controller::{cached_dto_html, index, stream_dto, template_command};
 use anyhow::{Context, Result};
 use eventstore::Client;
 use gyg_eventsource::cache_db::redis::RedisStateDb;
@@ -46,10 +46,10 @@ async fn main() -> Result<()> {
 
     let repo_dto = TemplateDtoRepository::new(event_store_db, dto_redis.clone());
 
+    let repo_dto_spawn = repo_dto.clone();
     tokio::spawn(async move {
-        let repo_dto = repo_dto.clone();
         let stream = Stream::Stream(STREAM_NAME);
-        repo_dto.cache_dto(&stream, GROUP_NAME).await.unwrap();
+        repo_dto_spawn.cache_dto(&stream, GROUP_NAME).await.unwrap();
     });
 
     let cors = rocket_cors::CorsOptions {
@@ -73,9 +73,13 @@ async fn main() -> Result<()> {
         .merge(("template_dir", "server/templates"));
     let _rocket = rocket::custom(figment)
         .manage(repo_state)
+        .manage(repo_dto)
         .manage(dto_redis)
         .mount("/", routes![index])
-        .mount("/api", routes![template_command, cached_dto_html])
+        .mount(
+            "/api",
+            routes![template_command, cached_dto_html, stream_dto],
+        )
         .mount("/", FileServer::from(relative!("web")))
         .attach(cors)
         .attach(Template::fairing())
