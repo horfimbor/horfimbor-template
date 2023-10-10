@@ -102,72 +102,57 @@ struct State {
     content : TemplateDto
 }
 
-#[function_component(StateGetter)]
-fn state_getter() -> Html {
-    let data = use_atom_value::<State>();
-
-    let nb = data.content.average();
-
-    html! { <em>{nb}</em> }
-}
-
-
+#[allow(dead_code)]
 pub struct Template {
-  es : EventSource
+  es : EventSource, // not read variable needed to keep the event source open
+  dto : TemplateDto
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
-enum DtoMessage {
+pub enum DtoMessage {
     Dto(TemplateDto),
     Event(TemplateEvent)
 }
 
 impl Component for Template {
-    type Message = ();
+    type Message = DtoMessage;
     type Properties = ();
 
-    fn create(_ctx: &Context<Self>) -> Self {
+    fn create(ctx: &Context<Self>) -> Self {
 
         let mut es = EventSource::new(format!("{}data", API_BASE_URL).as_str()).unwrap();
         let mut stream = es.subscribe("message").unwrap();
 
-
+        let link = ctx.link().clone();
         spawn_local(async move {
-            // let state = use_atom::<State>();
 
-            let mut tmpDto = TemplateDto::default();
             while let Some(Ok((_, msg))) = stream.next().await {
                 if let Some(json) = msg.data().as_string(){
                     let message: DtoMessage = serde_json::from_str(json.as_str()).unwrap();
-                    console_info!(format!("message ::: {:?}", message));
-
-                    match message {
-                        DtoMessage::Dto(dto) => {
-                            tmpDto = dto.clone();
-                            // state.set(
-                            //     State{
-                            //         content: dto
-                            //     }
-                            // ).unwrap()
-                        }
-                        DtoMessage::Event(event) => {
-                            tmpDto.play_event(&event);
-                            // state.set(
-                            //     State{
-                            //         content: tmpDto.clone()
-                            //     }
-                            // ).unwrap()
-                        }
-                    };
-                    console_info!(format!("state ::: {:?}", tmpDto));
+                    let link = link.clone();
+                   link.send_message (message);
                 }
             }
             console_info!("EventSource Closed");
         });
 
         Self {
-            es
+            es,
+            dto: TemplateDto::default()
+        }
+    }
+
+    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+        match msg {
+            DtoMessage::Dto(d) => {
+                self.dto = d;
+                true
+            }
+            DtoMessage::Event(e) => {
+                self.dto.play_event(&e);
+                true
+            }
         }
     }
 
@@ -176,7 +161,12 @@ impl Component for Template {
             <BounceRoot>
                 <fieldset>
                     <div style="float:right">
-                        <StateGetter />
+                        {"Average : "}{self.dto.average()}<br/>
+                        <ul>
+                        { for self.dto.last_ten().iter().map(|(c, n)| html!{
+                            <li>{c}{n}</li>
+                        } )}
+                        </ul>
                     </div>
                     <div>
                         <LocalDataSetter />

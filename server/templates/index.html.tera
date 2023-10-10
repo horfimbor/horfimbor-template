@@ -13,10 +13,5 @@
 </head>
 <body>
     {% include "update-template" %}
-    <hr/>
-    {% include "update-template" %}
-    <hr/>
-    {% include "update-template" %}
-
 
 </body>
