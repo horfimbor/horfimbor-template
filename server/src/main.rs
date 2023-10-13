@@ -49,7 +49,7 @@ async fn main() -> Result<()> {
     let repo_dto_spawn = repo_dto.clone();
     tokio::spawn(async move {
         let stream = Stream::Stream(STREAM_NAME);
-        repo_dto_spawn.cache_dto(&stream, GROUP_NAME).await.unwrap();
+        repo_dto_spawn.cache_dto(&stream, GROUP_NAME).await
     });
 
     let cors = rocket_cors::CorsOptions {

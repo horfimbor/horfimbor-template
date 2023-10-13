@@ -180,7 +180,7 @@ impl Component for Template {
             Err(_) => {
                 return Self {
                     es: None,
-                    dto: Err(format!("cannot subscribe to all messages")),
+                    dto: Err("cannot subscribe to all messages".to_string()),
                 };
             }
         };
@@ -197,12 +197,12 @@ impl Component for Template {
                             link.send_message(m);
                         }
                         Err(_) => {
-                            link.send_message(DtoMessage::Error(format!("stream closed")));
+                            link.send_message(DtoMessage::Error("stream closed".to_string()));
                         }
                     }
                 }
             }
-            link.send_message(DtoMessage::Error(format!("EventSource closed")));
+            link.send_message(DtoMessage::Error("EventSource closed".to_string()));
             console_info!("EventSource Closed");
         });
 
