@@ -31,4 +31,9 @@ start the server :
 cargo watch -w server -w shared -w state -i server/web/ -i server/templates -x "run -p template-server"
 ```
 
+before any commit please run the following : 
 
+```shell
+cargo fmt
+cargo clippy -- -D clippy::expect_used -D clippy::panic  -D clippy::unwrap_used
+```

@@ -14,8 +14,6 @@ use template_shared::command::TemplateCommand;
 use template_shared::event::TemplateEvent;
 use uuid::Uuid;
 
-
-
 #[post("/", format = "json", data = "<command>")]
 pub async fn template_command(
     state_repository: &State<TemplateRepository>,
@@ -43,8 +41,6 @@ pub async fn stream_dto(
     dto_repository: &State<TemplateDtoRepository>,
     cookies: &CookieJar<'_>,
 ) -> EventStream![] {
-
-
     let uuid = match cookies.get("uuid") {
         None => {
             let uuid = Uuid::new_v4().to_string();
