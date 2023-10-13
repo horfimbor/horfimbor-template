@@ -40,7 +40,7 @@ pub async fn stream_dto(
     dto_redis: &State<TemplateDtoCache>,
     dto_repository: &State<TemplateDtoRepository>,
     cookies: &CookieJar<'_>,
-) -> EventStream![] {
+) -> Result<EventStream![], String> {
     let uuid = match cookies.get("uuid") {
         None => {
             let uuid = Uuid::new_v4().to_string();
@@ -51,27 +51,47 @@ pub async fn stream_dto(
     };
 
     let key = ModelKey::new(STREAM_NAME, uuid);
-    let dto = dto_redis.get(&key).map_err(|e| e.to_string()).unwrap();
+    let dto = dto_redis
+        .get(&key)
+        .map_err(|e| e.to_string())
+        .map_err(|_| "cannot find the dto".to_string())?;
 
     let mut subscription = dto_repository
         .get_subscription(Stream::Model(key), dto.position())
         .await;
 
-    EventStream! {
+    Ok(EventStream! {
         yield Event::json(&dto.state());
         loop {
-            let event = subscription.next().await.unwrap();
+            let event = if let Ok(event) = subscription.next().await{
+                event
+            }else{
+                yield Event::data("cannot get event").event("error");
+                break;
+            };
             let original_event = event.get_original_event();
-            let metadata: Metadata =  serde_json::from_slice(original_event.custom_metadata.as_ref()).unwrap();
+            let metadata: Metadata = if let Ok(metadata) =  serde_json::from_slice(original_event.custom_metadata.as_ref()){
+                metadata
+            }else{
+                yield Event::data("cannot get metdata").event("error");
+                break;
+            };
 
             if metadata.is_event(){
 
-                let event = original_event.as_json::<TemplateEvent>().unwrap();
+                match original_event.as_json::<TemplateEvent>(){
+                    Ok(event) =>{
+                        yield Event::json(&event);
+                    },
+                    Err(_) => {
+                        yield Event::data("cannot get original event").event("error");
+                        break;
+                    }
+                };
 
-                yield Event::json(&event);
             }
         }
-    }
+    })
 }
 
 #[get("/data.html")]

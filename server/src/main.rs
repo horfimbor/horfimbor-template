@@ -35,7 +35,7 @@ async fn main() -> Result<()> {
 
     let event_store_db = Client::new(settings).context("fail to connect to eventstore db")?;
 
-    let redis_client = redis::Client::open("redis://localhost:6379/").unwrap();
+    let redis_client = redis::Client::open("redis://localhost:6379/")?;
 
     let repo_state = TemplateRepository::new(
         event_store_db.clone(),
