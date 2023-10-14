@@ -31,6 +31,10 @@ start the server :
 cargo watch -w server -w shared -w state -i server/web/ -i server/templates -x "run -p template-server"
 ```
 
+```shell
+cargo build -p template-server
+```
+
 before any commit please run the following : 
 
 ```shell

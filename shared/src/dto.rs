@@ -34,6 +34,8 @@ impl TemplateDto {
         match event {
             TemplateEvent::Added(nb) => self.last_ten.push(('+', *nb)),
             TemplateEvent::Removed(nb) => self.last_ten.push(('-', *nb)),
+            TemplateEvent::Delayed(_) => {}
+            TemplateEvent::DelayDone(_) => {}
         };
         if self.last_ten.len() > 10 {
             self.last_ten.remove(0);
