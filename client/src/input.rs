@@ -1,39 +1,47 @@
 use bounce::BounceRoot;
-use bounce::{Atom, use_atom};
+use bounce::{use_atom, Atom};
 use reqwasm::http::{Request, Response};
 use web_sys::HtmlInputElement;
 use weblog::console_info;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 
-use template_shared::command::TemplateCommand;
-use template_shared::dto::TemplateDto;
 use crate::API_BASE_URL;
+use template_shared::command::{Delay, TemplateCommand};
+use template_shared::dto::TemplateDto;
+
+const DEFAULT_TO_ADD: usize = 42;
+const DEFAULT_DELAY: usize = 2;
 
 #[derive(Eq, PartialEq, Atom)]
 struct LocalData {
-    nb: Result<usize, String>,
+    nb: usize,
+    delay: usize,
 }
-
-const DEFAULT_TO_ADD: usize = 42;
 
 impl Default for LocalData {
     fn default() -> Self {
         Self {
-            nb: Ok(DEFAULT_TO_ADD),
+            nb: DEFAULT_TO_ADD,
+            delay: DEFAULT_DELAY,
         }
     }
 }
 
+#[derive(Eq, PartialEq, Atom, Default)]
+struct LocalError {
+    err: Option<String>,
+}
+
 #[function_component(ErrorDisplay)]
 fn error_display() -> Html {
-    let data = use_atom::<LocalData>();
+    let data = use_atom::<LocalError>();
 
-    match data.nb.clone() {
-        Ok(_) => {
+    match data.err.clone() {
+        None => {
             html! {}
         }
-        Err(e) => {
+        Some(e) => {
             html! {
                 <h2>
                     {e}
@@ -46,29 +54,63 @@ fn error_display() -> Html {
 #[function_component(LocalDataSetter)]
 fn local_data_setter() -> Html {
     let data = use_atom::<LocalData>();
+    let err = use_atom::<LocalError>();
 
-    let on_text_input = {
+    let on_nb_input = {
         let data = data.clone();
+        let err = err.clone();
 
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();
 
-            data.set(LocalData {
-                nb: input
-                    .value()
-                    .parse()
-                    .map_err(|_e| "cannot parse input".to_string()),
-            });
+            let nb: Result<usize, String> = input
+                .value()
+                .parse()
+                .map_err(|_e| "cannot parse input nb".to_string());
+
+            match nb {
+                Ok(nb) => {
+                    data.set(LocalData {
+                        nb,
+                        delay: data.delay,
+                    });
+                    err.set(LocalError { err: None });
+                }
+                Err(s) => err.set(LocalError { err: Some(s) }),
+            };
         })
     };
-    let nb = match data.nb {
-        Ok(nb) => nb,
-        Err(_) => DEFAULT_TO_ADD,
-    }
-    .to_string();
+
+    let on_delay_input = {
+        let data = data.clone();
+        let err = err.clone();
+
+        Callback::from(move |e: InputEvent| {
+            let input: HtmlInputElement = e.target_unchecked_into();
+
+            let delay: Result<usize, String> = input
+                .value()
+                .parse()
+                .map_err(|_e| "cannot parse input delay".to_string());
+
+            match delay {
+                Ok(delay) => {
+                    data.set(LocalData { nb: data.nb, delay });
+                    err.set(LocalError { err: None });
+                }
+                Err(s) => err.set(LocalError { err: Some(s) }),
+            };
+        })
+    };
+
     html! {
         <div>
-            <input type="number" oninput={on_text_input} value={nb} />
+            <label>{"to add"}
+                <input type="number" oninput={on_nb_input} value={data.nb.to_string()} />
+            </label><br/>
+            <label>{"delay"}
+                <input type="number" oninput={on_delay_input} value={data.delay.to_string()} />
+            </label>
         </div>
     }
 }
@@ -76,10 +118,20 @@ fn local_data_setter() -> Html {
 #[function_component(Sender)]
 fn sender() -> Html {
     let data = use_atom::<LocalData>();
+    let err = use_atom::<LocalError>();
 
     let on_send_clicked = Callback::from(move |_| {
         let data = data.clone();
-        let cmd = TemplateCommand::Add(data.nb.clone().unwrap_or(DEFAULT_TO_ADD));
+        let err = err.clone();
+
+        let cmd = if data.delay == 0 {
+            TemplateCommand::Add(data.nb)
+        } else {
+            TemplateCommand::Delayed(Delay {
+                delay: data.delay,
+                to_add: data.nb,
+            })
+        };
 
         spawn_local(async move {
             match send_command(&cmd).await {
@@ -89,7 +141,7 @@ fn sender() -> Html {
                     }
                 }
                 Err(e) => {
-                    data.set(LocalData { nb: Err(e) });
+                    err.set(LocalError { err: Some(e) });
                 }
             }
         });
@@ -109,10 +161,10 @@ async fn send_command(cmd: &TemplateCommand) -> Result<Response, String> {
 
 #[function_component(Reset)]
 fn reset() -> Html {
-    let data = use_atom::<LocalData>();
+    let err = use_atom::<LocalError>();
 
     let on_reset_clicked = Callback::from(move |_| {
-        let data = data.clone();
+        let err = err.clone();
         spawn_local(async move {
             let cmd = TemplateCommand::Reset;
 
@@ -124,7 +176,7 @@ fn reset() -> Html {
                         }
                     }
                     Err(e) => {
-                        data.set(LocalData { nb: Err(e) });
+                        err.set(LocalError { err: Some(e) });
                     }
                 }
             });

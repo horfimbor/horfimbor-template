@@ -9,7 +9,6 @@ use web_sys::HtmlElement;
 use weblog::console_info;
 use yew::AppHandle;
 
-
 // API that counts visits to the web-page
 const API_BASE_URL: &str = "http://localhost:8000/api/";
 
