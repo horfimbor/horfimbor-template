@@ -1273,7 +1273,7 @@ dependencies = [
 [[package]]
 name = "gyg-eventsource"
 version = "0.0.1"
-source = "git+https://github.com/galakhygame/gyg-eventsource?branch=main#27302cf250ebabc89bd18b60f458fd5fbea6c695"
+source = "git+https://github.com/galakhygame/gyg-eventsource?branch=resolve-link-to-event#5b50d9d272f6b266a45c88c08b82cef0a99e4a84"
 dependencies = [
  "async-trait",
  "eventstore",
@@ -1290,7 +1290,7 @@ dependencies = [
 [[package]]
 name = "gyg-eventsource-derive"
 version = "0.1.0"
-source = "git+https://github.com/galakhygame/gyg-eventsource?branch=main#27302cf250ebabc89bd18b60f458fd5fbea6c695"
+source = "git+https://github.com/galakhygame/gyg-eventsource?branch=resolve-link-to-event#5b50d9d272f6b266a45c88c08b82cef0a99e4a84"
 dependencies = [
  "convert_case",
  "proc-macro2",

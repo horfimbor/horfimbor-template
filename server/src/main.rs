@@ -3,19 +3,24 @@ mod controller;
 #[macro_use]
 extern crate rocket;
 
-use crate::controller::{cached_dto_html, index, stream_dto, template_command};
+use crate::controller::{index, stream_dto, template_command};
 use anyhow::{Context, Result};
-use eventstore::Client;
+use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
 use gyg_eventsource::cache_db::redis::RedisStateDb;
+use gyg_eventsource::model_key::ModelKey;
 use gyg_eventsource::repository::{DtoRepository, Repository, StateRepository};
 use gyg_eventsource::Stream;
 use rocket::fs::{relative, FileServer};
 use rocket::http::Method;
 use rocket::response::content::RawHtml;
 use rocket::tokio;
+use rocket::tokio::time::sleep;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use template_shared::command::TemplateCommand;
 use template_shared::dto::TemplateDto;
+use template_shared::event::TemplateEvent;
 use template_state::TemplateState;
 
 type TemplateStateCache = RedisStateDb<TemplateState>;
@@ -52,6 +57,55 @@ async fn main() -> Result<()> {
         repo_dto_spawn.cache_dto(&stream, GROUP_NAME).await
     });
 
+    let repo_state_spawn = repo_state.clone();
+    tokio::spawn(async move {
+        let stream = Stream::Event("evt.delayed");
+        let group_name = "bob";
+
+        repo_state_spawn
+            .create_subscription(&stream, group_name)
+            .await
+            .unwrap();
+
+        let options = SubscribeToPersistentSubscriptionOptions::default().buffer_size(1);
+
+        let mut sub = repo_state_spawn
+            .event_db()
+            .subscribe_to_persistent_subscription(stream.to_string(), group_name, &options)
+            .await
+            .unwrap();
+
+        loop {
+            let repo_state_spawn = repo_state_spawn.clone();
+            let rcv_event = sub.next().await.unwrap();
+
+            let event = rcv_event.event.as_ref().unwrap();
+
+            let json = event.as_json::<TemplateEvent>().unwrap();
+
+            if let TemplateEvent::Delayed(delayed) = json {
+                let key = ModelKey::from(event.stream_id.as_str());
+
+                tokio::spawn(async move {
+                    let now = SystemTime::now();
+                    let epoch = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+
+                    let to_wait = delayed.timestamp as i64 - epoch as i64;
+
+                    if to_wait > 0 {
+                        sleep(Duration::from_secs(1) * to_wait as u32).await;
+                    }
+
+                    repo_state_spawn
+                        .add_command(&key, TemplateCommand::Finalize(delayed.id), None)
+                        .await
+                        .unwrap();
+                });
+            }
+            sub.ack(rcv_event).await.unwrap();
+        }
+    });
+
     let cors = rocket_cors::CorsOptions {
         allowed_origins: AllowedOrigins::some_exact(&[
             "http://127.0.0.1:8000",
@@ -76,10 +130,7 @@ async fn main() -> Result<()> {
         .manage(repo_dto)
         .manage(dto_redis)
         .mount("/", routes![index])
-        .mount(
-            "/api",
-            routes![template_command, cached_dto_html, stream_dto],
-        )
+        .mount("/api", routes![template_command, stream_dto])
         .mount("/", FileServer::from(relative!("web")))
         .attach(cors)
         .attach(Template::fairing())
