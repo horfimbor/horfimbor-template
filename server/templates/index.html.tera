@@ -12,6 +12,5 @@
     </script>
 </head>
 <body>
-    {% include "update-template" %}
-
+    {% include "template_render" %}
 </body>

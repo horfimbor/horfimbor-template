@@ -40,9 +40,14 @@ impl Dto for TemplateState {
             TemplateEvent::Delayed(d) => {
                 self.last_id = d.id;
                 self.delayed.push(d.clone());
-            },
+            }
             TemplateEvent::DelayDone(id) => {
-                self.delayed = self.delayed.clone().into_iter().filter(|d| d.id != *id).collect();
+                self.delayed = self
+                    .delayed
+                    .clone()
+                    .into_iter()
+                    .filter(|d| d.id != *id)
+                    .collect();
             }
         }
     }
@@ -80,23 +85,24 @@ impl State for TemplateState {
                     .map_err(|_| Self::Error::CannotCalculateTime)?;
 
                 Ok(vec![Self::Event::Delayed(Delayed {
-                    id : self.last_id +1,
+                    id: self.last_id + 1,
                     timestamp: end.as_secs(),
                     to_add: d.to_add,
                 })])
             }
             TemplateCommand::Finalize(id) => {
-
                 let now = SystemTime::now();
-                let epoch = now.duration_since(UNIX_EPOCH)
-                    .map_err(|_| Self::Error::CannotCalculateTime)?.as_secs();
+                let epoch = now
+                    .duration_since(UNIX_EPOCH)
+                    .map_err(|_| Self::Error::CannotCalculateTime)?
+                    .as_secs();
 
-                for i in 0..self.delayed.len(){
+                for i in 0..self.delayed.len() {
                     if self.delayed[i].id == id && self.delayed[i].timestamp >= epoch {
                         return Ok(vec![
                             Self::Event::DelayDone(id),
-                            Self::Event::Added( self.delayed[i].to_add)
-                        ])
+                            Self::Event::Added(self.delayed[i].to_add),
+                        ]);
                     }
                 }
 
