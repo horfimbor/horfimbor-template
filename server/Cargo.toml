@@ -7,17 +7,18 @@ edition = "2021"
 
 [dependencies]
 gyg-eventsource = { workspace = true }
+clap = { workspace = true }
 serde = { workspace = true }
 eventstore = { workspace = true }
 uuid = { workspace = true }
 thiserror = { workspace = true }
 template-shared = { path = "../shared", features = ["server"] }
 template-state = { path = "../state" }
-redis= { version = "0.23", features = ["tokio-native-tls-comp"] }
+redis= {  workspace = true }
 rocket = { workspace=true, features = ["json"] }
 rocket_cors = "0.6.0-alpha2"
 serde_json = { workspace = true }
-anyhow = "1.0"
+anyhow = { workspace = true }
 chrono = "0.4"
 
 [dependencies.rocket_dyn_templates]

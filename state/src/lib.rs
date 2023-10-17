@@ -99,7 +99,6 @@ impl State for TemplateState {
 
                 for i in 0..self.delayed.len() {
                     if self.delayed[i].id == id && epoch >= self.delayed[i].timestamp {
-
                         return Ok(vec![
                             Self::Event::DelayDone(id),
                             Self::Event::Added(self.delayed[i].to_add),
