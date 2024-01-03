@@ -19,7 +19,7 @@ type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
 const STREAM_NAME: &str = "template2";
 const GROUP_NAME: &str = "t2";
 
-#[derive(ValueEnum)]
+#[derive(ValueEnum, Clone, Debug)]
 enum Consumer {
     Delay,
     Dto,

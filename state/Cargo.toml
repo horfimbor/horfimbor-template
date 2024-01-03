@@ -16,8 +16,12 @@ template-shared = { path = "../shared", features = ["server"] }
 tokio = { version = "1.21" , features = ["rt", "rt-multi-thread", "macros"]}
 async-trait = "0.1"
 cucumber = { version = "0.20.0" }
-anyhow= "1.0"
+anyhow= {workspace = true}
 
 [[test]]
 name = "template-state-test" # this should be the same as the filename of your test target
 harness = false  # allows Cucumber to print output instead of libtest
+
+
+[lints]
+workspace = true

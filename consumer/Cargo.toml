@@ -12,5 +12,9 @@ eventstore = { workspace = true }
 gyg-eventsource = { workspace = true }
 redis= {  workspace = true }
 template-shared = { path = "../shared", features = ["server"] }
-tokio = "1.33"
+tokio = { version = "1.33", features = ["full"] }
 template-state = { path = "../state" }
+
+
+[lints]
+workspace = true

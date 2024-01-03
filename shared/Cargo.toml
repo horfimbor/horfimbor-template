@@ -12,3 +12,7 @@ thiserror = { workspace = true }
 
 [features]
 server = ["gyg-eventsource"]
+
+
+[lints]
+workspace = true

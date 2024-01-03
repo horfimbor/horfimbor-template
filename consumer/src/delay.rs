@@ -48,15 +48,17 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
                 let epoch = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
 
                 let to_wait = delayed.timestamp as i64 - epoch as i64;
-
+                dbg!(to_wait);
                 if to_wait > 0 {
                     sleep(Duration::from_secs(1) * to_wait as u32).await;
                 }
 
-                repo_state
+                let s = repo_state
                     .add_command(&key, TemplateCommand::Finalize(delayed.id), None)
                     .await
                     .unwrap();
+
+                dbg!(s);
             });
         }
         sub.ack(rcv_event).await.unwrap();
