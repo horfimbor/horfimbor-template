@@ -1,8 +1,8 @@
 use crate::{TemplateRepository, TemplateStateCache, GROUP_NAME, STREAM_NAME};
 use anyhow::Result;
 use eventstore::Client;
-use gyg_eventsource::repository::Repository;
-use gyg_eventsource::Stream;
+use chrono_craft_engine::repository::Repository;
+use chrono_craft_engine::Stream;
 use redis::Client as Redis;
 
 pub async fn cache_state(redis_client: Redis, event_store_db: Client) -> Result<()> {

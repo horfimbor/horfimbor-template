@@ -1,6 +1,42 @@
 version: "3.4"
 
 services:
+
+  server:
+    build:
+      target: final-server
+      args:
+        RUST_VERSION: 1.75.0
+        WASM_TAG: v0.1.0
+    env_file:
+      - .env.local
+    ports:
+      - "8000:8000"
+
+  consumer-delay:
+    build:
+      context: .
+      target: final-consumer
+    env_file:
+      - .env.local
+    command: ["template-consumer", "--consumer", "delay"]
+
+  consumer-dto:
+    build:
+      context: .
+      target: final-consumer
+    env_file:
+      - .env.local
+    command: ["template-consumer", "--consumer", "dto"]
+
+  consumer-state:
+    build:
+      context: .
+      target: final-consumer
+    env_file:
+      - .env.local
+    command: ["template-consumer", "--consumer", "state"]
+
   evenstore:
     image: eventstore/eventstore:21.10.6-bionic
     environment:

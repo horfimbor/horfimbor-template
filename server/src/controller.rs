@@ -1,10 +1,10 @@
 use crate::{TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
 use chrono::prelude::*;
-use gyg_eventsource::cache_db::CacheDb;
-use gyg_eventsource::metadata::Metadata;
-use gyg_eventsource::model_key::ModelKey;
-use gyg_eventsource::repository::Repository;
-use gyg_eventsource::Stream;
+use chrono_craft_engine::cache_db::CacheDb;
+use chrono_craft_engine::metadata::Metadata;
+use chrono_craft_engine::model_key::ModelKey;
+use chrono_craft_engine::repository::Repository;
+use chrono_craft_engine::Stream;
 use rocket::http::{Cookie, CookieJar};
 use rocket::response::stream::{Event, EventStream};
 use rocket::serde::json::Json;

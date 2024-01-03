@@ -1,5 +1,5 @@
 #[cfg(feature = "server")]
-use gyg_eventsource::Dto;
+use chrono_craft_engine::Dto;
 
 #[cfg(feature = "server")]
 use crate::error::TemplateError;

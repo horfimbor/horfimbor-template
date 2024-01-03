@@ -9,8 +9,8 @@ members = [
 ]
 
 [workspace.dependencies]
-#gyg-eventsource = {git= "https://github.com/ChronoCraftEngine/chrono-craft-engine", branch = "main"}
-gyg-eventsource = {path = "../chrono-craft-engine"}
+chrono-craft-engine = {git= "https://github.com/ChronoCraftEngine/chrono-craft-engine", branch = "update-redis"}
+#chrono-craft-engine = {path = "../chrono-craft-engine"}
 anyhow = "1.0"
 clap = { version = "4.4", features = ["derive"] }
 redis= { version = "0.24", features = ["tokio-rustls-comp"] }

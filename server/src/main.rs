@@ -6,14 +6,15 @@ extern crate rocket;
 use crate::controller::{index, stream_dto, template_command};
 use anyhow::{Context, Result};
 use eventstore::Client;
-use gyg_eventsource::cache_db::redis::RedisStateDb;
-use gyg_eventsource::repository::{DtoRepository, Repository, StateRepository};
+use chrono_craft_engine::cache_db::redis::RedisStateDb;
+use chrono_craft_engine::repository::{DtoRepository, Repository, StateRepository};
 use rocket::fs::{relative, FileServer};
 use rocket::http::Method;
 use rocket::response::content::RawHtml;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
 use std::env;
+use rocket::response::Redirect;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
@@ -24,8 +25,13 @@ type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
 
 const STREAM_NAME: &str = "template2";
 
+mod built_info {
+    include!(concat!(env!("OUT_DIR"), "/built.rs"));
+}
+
 #[rocket::main]
 async fn main() -> Result<()> {
+
     let settings = env::var("EVENTSTORE_URI")
         .context("fail to get EVENTSTORE_URI env var")?
         .parse()
@@ -68,7 +74,7 @@ async fn main() -> Result<()> {
         .manage(repo_state)
         .manage(repo_dto)
         .manage(dto_redis)
-        .mount("/", routes![index])
+        .mount("/", routes![index, redirect_index_js])
         .mount("/api", routes![template_command, stream_dto])
         .mount("/", FileServer::from(relative!("web")))
         .attach(cors)
@@ -79,6 +85,15 @@ async fn main() -> Result<()> {
 
     Ok(())
 }
+
+#[get("/webcomponent/index.js")]
+fn redirect_index_js() -> Redirect {
+    Redirect::temporary(format!(
+        "/webcomponent/index-v{}.js",
+        built_info::PKG_VERSION.replace('.', "-")
+    ))
+}
+
 
 #[catch(404)]
 fn general_not_found() -> RawHtml<&'static str> {

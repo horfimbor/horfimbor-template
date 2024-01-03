@@ -308,6 +308,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "built"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38d17f4d6e4dc36d1a02fbedc2753a096848e7c1b0772f7654eab8e2c927dd53"
+
+[[package]]
 name = "bumpalo"
 version = "3.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -365,6 +371,35 @@ dependencies = [
  "serde",
  "wasm-bindgen",
  "windows-targets 0.48.5",
+]
+
+[[package]]
+name = "chrono-craft-engine"
+version = "0.0.1"
+source = "git+https://github.com/ChronoCraftEngine/chrono-craft-engine?branch=update-redis#fb5096770012c7820e0d48d65984428abc0ca020"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "chrono-craft-engine-derive",
+ "eventstore",
+ "futures",
+ "redis",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "chrono-craft-engine-derive"
+version = "0.1.0"
+source = "git+https://github.com/ChronoCraftEngine/chrono-craft-engine?branch=update-redis#fb5096770012c7820e0d48d65984428abc0ca020"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.46",
 ]
 
 [[package]]
@@ -1435,32 +1470,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "956caa58d4857bc9941749d55e4bd3000032d8212762586fa5705632967140e7"
 dependencies = [
  "proc-macro-crate",
- "proc-macro2",
- "quote",
- "syn 2.0.46",
-]
-
-[[package]]
-name = "gyg-eventsource"
-version = "0.0.1"
-dependencies = [
- "async-trait",
- "eventstore",
- "futures",
- "gyg-eventsource-derive",
- "redis",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "uuid",
-]
-
-[[package]]
-name = "gyg-eventsource-derive"
-version = "0.1.0"
-dependencies = [
- "convert_case",
  "proc-macro2",
  "quote",
  "syn 2.0.46",
@@ -3302,9 +3311,9 @@ name = "template-consumer"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono-craft-engine",
  "clap",
  "eventstore",
- "gyg-eventsource",
  "redis",
  "template-shared",
  "template-state",
@@ -3316,10 +3325,11 @@ name = "template-server"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "built",
  "chrono",
+ "chrono-craft-engine",
  "clap",
  "eventstore",
- "gyg-eventsource",
  "redis",
  "rocket",
  "rocket_cors",
@@ -3336,7 +3346,7 @@ dependencies = [
 name = "template-shared"
 version = "0.1.0"
 dependencies = [
- "gyg-eventsource",
+ "chrono-craft-engine",
  "serde",
  "thiserror",
 ]
@@ -3347,8 +3357,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "chrono-craft-engine",
  "cucumber",
- "gyg-eventsource",
  "serde",
  "template-shared",
  "tokio",
@@ -4370,9 +4380,9 @@ checksum = "dff9641d1cd4be8d1a070daf9e3773c5f67e78b4d9d42263020c057706765c04"
 
 [[package]]
 name = "winnow"
-version = "0.5.31"
+version = "0.5.32"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97a4882e6b134d6c28953a387571f1acdd3496830d5e36c5e3a1075580ea641c"
+checksum = "8434aeec7b290e8da5c3f0d628cb0eac6cabcb31d14bb74f779a08109a5914d6"
 dependencies = [
  "memchr",
 ]

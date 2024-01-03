@@ -1,7 +1,7 @@
 #[cfg(feature = "server")]
-use gyg_eventsource::gyg_eventsource_derive::Event;
+use chrono_craft_engine::chrono_craft_engine_derive::Event;
 #[cfg(feature = "server")]
-use gyg_eventsource::{Event, EventName};
+use chrono_craft_engine::{Event, EventName};
 
 use serde::{Deserialize, Serialize};
 

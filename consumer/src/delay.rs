@@ -1,9 +1,9 @@
 use crate::{TemplateRepository, TemplateStateCache};
 use anyhow::Result;
 use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
-use gyg_eventsource::model_key::ModelKey;
-use gyg_eventsource::repository::Repository;
-use gyg_eventsource::Stream;
+use chrono_craft_engine::model_key::ModelKey;
+use chrono_craft_engine::repository::Repository;
+use chrono_craft_engine::Stream;
 use redis::Client as Redis;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use template_shared::command::TemplateCommand;

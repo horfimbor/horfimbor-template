@@ -9,7 +9,7 @@ edition = "2021"
 anyhow = { workspace = true }
 clap = { workspace = true }
 eventstore = { workspace = true }
-gyg-eventsource = { workspace = true }
+chrono-craft-engine = { workspace = true }
 redis= {  workspace = true }
 template-shared = { path = "../shared", features = ["server"] }
 tokio = { version = "1.33", features = ["full"] }
