@@ -106,7 +106,6 @@ RUN apt update \
 RUN update-ca-certificates
 
 RUN mkdir -p /app/server/web/
-RUN mkdir -p /app/server/templates/
 
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/develop/develop-images/dockerfile_best-practices/#user
@@ -128,6 +127,8 @@ COPY server/templates/ /app/server/templates/
 
 # Expose the port that the application listens on.
 EXPOSE 8000
+
+WORKDIR /app
 
 # What the container should run when it is started.
 CMD ["/bin/template-server"]

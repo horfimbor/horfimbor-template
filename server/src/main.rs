@@ -14,6 +14,7 @@ use rocket::response::content::RawHtml;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
 use std::env;
+use std::net::Ipv4Addr;
 use rocket::response::Redirect;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
@@ -69,6 +70,7 @@ async fn main() -> Result<()> {
 
     let figment = rocket::Config::figment()
         .merge(("port", 8000))
+        .merge(("address",Ipv4Addr::new(0, 0, 0, 0)))
         .merge(("template_dir", "server/templates"));
     let _rocket = rocket::custom(figment)
         .manage(repo_state)
@@ -86,10 +88,10 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-#[get("/webcomponent/index.js")]
+#[get("/template/index.js")]
 fn redirect_index_js() -> Redirect {
     Redirect::temporary(format!(
-        "/webcomponent/index-v{}.js",
+        "/template/index-v{}.js",
         built_info::PKG_VERSION.replace('.', "-")
     ))
 }

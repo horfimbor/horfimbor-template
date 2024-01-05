@@ -4,7 +4,7 @@ watch-client:
         wasm-pack build ./client \
           --target web \
           --out-dir ../server/web/template \
-          --out-name index
+          --out-name index-v0-1-0
 
 watch-server:
     export $(grep -v '^#' .env.local | xargs) && \
