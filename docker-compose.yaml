@@ -11,7 +11,8 @@ services:
     env_file:
       - .env.docker
     ports:
-      - "3000:8000"
+      - "8000:8000"
+    restart: unless-stopped
 
   consumer-delay:
     build:
@@ -20,6 +21,7 @@ services:
     env_file:
       - .env.docker
     command: ["template-consumer", "--consumer", "delay"]
+    restart: unless-stopped
 
   consumer-dto:
     build:
@@ -28,6 +30,7 @@ services:
     env_file:
       - .env.docker
     command: ["template-consumer", "--consumer", "dto"]
+    restart: unless-stopped
 
   consumer-state:
     build:
@@ -36,8 +39,9 @@ services:
     env_file:
       - .env.docker
     command: ["template-consumer", "--consumer", "state"]
+    restart: unless-stopped
 
-  eventstore.db:
+  eventstore:
     image: eventstore/eventstore:23.10.0-bookworm-slim
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
@@ -49,8 +53,6 @@ services:
       - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
       - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
       - EVENTSTORE_EXT_IP=0.0.0.0
-      - EVENTSTORE_EXT_HOST_ADVERTISE_AS=eventstore.db
-      - EVENTSTORE_HTTP_PORT_ADVERTISE_AS=2113
     ports:
       - "1113:1113"
       - "2113:2113"
