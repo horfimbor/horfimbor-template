@@ -75,6 +75,4 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
         }
         sub.ack(rcv_event).await.context("cannot ack")?;
     }
-
-    Ok(())
 }
