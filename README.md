@@ -12,28 +12,32 @@ install [Docker](https://www.docker.com/)
 install necessary toolchain : 
 ```shell
 rustup toolchain install beta
-rustup target add wasm32-unknown-unknown
+rustup target add wasm32-unknown-unknown 
 ```
 
 install tools : 
 ```shell 
+cargo install just
 cargo install wasm-pack
 cargo install cargo-watch
 ```
 
 create the client :
 ```shell
-cargo watch -w client -w shared -- wasm-pack build ./client --target web --out-dir ../server/web/template --out-name index
+just watch-client
 ```
 
 start the server :
 ```shell 
-cargo watch -w server -w shared -w state -i server/web/ -i server/templates -x "run -p template-server"
+just watch-server
+```
+
+```shell
+cargo build -p template-server
 ```
 
 before any commit please run the following : 
 
 ```shell
-cargo fmt
-cargo clippy -- -D clippy::expect_used -D clippy::panic  -D clippy::unwrap_used
+just precommit
 ```

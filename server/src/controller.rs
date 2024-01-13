@@ -1,10 +1,10 @@
 use crate::{TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
 use chrono::prelude::*;
-use gyg_eventsource::cache_db::CacheDb;
-use gyg_eventsource::metadata::Metadata;
-use gyg_eventsource::model_key::ModelKey;
-use gyg_eventsource::repository::Repository;
-use gyg_eventsource::Stream;
+use chrono_craft_engine::cache_db::CacheDb;
+use chrono_craft_engine::metadata::Metadata;
+use chrono_craft_engine::model_key::ModelKey;
+use chrono_craft_engine::repository::Repository;
+use chrono_craft_engine::Stream;
 use rocket::http::{Cookie, CookieJar};
 use rocket::response::stream::{Event, EventStream};
 use rocket::serde::json::Json;
@@ -20,12 +20,8 @@ pub async fn template_command(
     cookies: &CookieJar<'_>,
     command: Json<TemplateCommand>,
 ) -> Result<(), String> {
-    let uuid = match cookies.get("uuid") {
-        None => {
-            return Err("no cookies".to_string());
-        }
-        Some(crumb) => crumb.to_string(),
-    };
+    let uuid = get_uuid_from_cookies(cookies)?;
+
     let key = ModelKey::new(STREAM_NAME, uuid);
     state_repository
         .add_command(&key, command.0, None)
@@ -35,19 +31,34 @@ pub async fn template_command(
     Ok(())
 }
 
+fn get_uuid_from_cookies(cookies: &CookieJar) -> Result<String, String> {
+    let uuid = match cookies.get("uuid") {
+        None => {
+            return Err("no cookies".to_string());
+        }
+        Some(crumb) => crumb.to_string(),
+    }
+    .split('=')
+    .last()
+    .ok_or("invalid cookie".to_string())?
+    .to_string();
+
+    Ok(uuid)
+}
+
 #[get("/data")]
 pub async fn stream_dto(
     dto_redis: &State<TemplateDtoCache>,
     dto_repository: &State<TemplateDtoRepository>,
     cookies: &CookieJar<'_>,
 ) -> Result<EventStream![], String> {
-    let uuid = match cookies.get("uuid") {
-        None => {
+    let uuid = match get_uuid_from_cookies(cookies) {
+        Ok(value) => value,
+        Err(_) => {
             let uuid = Uuid::new_v4().to_string();
             cookies.add(Cookie::new("uuid", uuid.clone()));
             uuid
         }
-        Some(crumb) => crumb.to_string(),
     };
 
     let key = ModelKey::new(STREAM_NAME, uuid);
@@ -92,31 +103,6 @@ pub async fn stream_dto(
             }
         }
     })
-}
-
-#[get("/data.html")]
-pub async fn cached_dto_html(
-    dto_redis: &State<TemplateDtoCache>,
-    cookies: &CookieJar<'_>,
-) -> Result<Template, String> {
-    let uuid = match cookies.get("uuid") {
-        None => {
-            let uuid = Uuid::new_v4().to_string();
-            cookies.add(Cookie::new("uuid", uuid.clone()));
-            uuid
-        }
-        Some(crumb) => crumb.to_string(),
-    };
-
-    let key = ModelKey::new(STREAM_NAME, uuid);
-    let dto = dto_redis.get(&key).map_err(|e| e.to_string())?;
-
-    Ok(Template::render(
-        "data",
-        context! {
-            dto: dto.state()
-        },
-    ))
 }
 
 #[get("/")]

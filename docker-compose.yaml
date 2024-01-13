@@ -1,8 +1,48 @@
 version: "3.4"
 
 services:
-  evenstore:
-    image: eventstore/eventstore:21.10.6-bionic
+
+  server:
+    build:
+      target: final-server
+      args:
+        RUST_VERSION: 1.75.0
+        WASM_TAG: v0.1.0
+    env_file:
+      - .env.docker
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  consumer-delay:
+    build:
+      context: .
+      target: final-consumer
+    env_file:
+      - .env.docker
+    command: ["template-consumer", "--consumer", "delay"]
+    restart: unless-stopped
+
+  consumer-dto:
+    build:
+      context: .
+      target: final-consumer
+    env_file:
+      - .env.docker
+    command: ["template-consumer", "--consumer", "dto"]
+    restart: unless-stopped
+
+  consumer-state:
+    build:
+      context: .
+      target: final-consumer
+    env_file:
+      - .env.docker
+    command: ["template-consumer", "--consumer", "state"]
+    restart: unless-stopped
+
+  eventstore:
+    image: eventstore/eventstore:23.10.0-bookworm-slim
     environment:
       - EVENTSTORE_CLUSTER_SIZE=1
       - EVENTSTORE_RUN_PROJECTIONS=All
@@ -12,6 +52,7 @@ services:
       - EVENTSTORE_INSECURE=true
       - EVENTSTORE_ENABLE_EXTERNAL_TCP=true
       - EVENTSTORE_ENABLE_ATOM_PUB_OVER_HTTP=true
+      - EVENTSTORE_EXT_IP=0.0.0.0
     ports:
       - "1113:1113"
       - "2113:2113"

@@ -6,6 +6,9 @@ use thiserror::Error;
 pub enum TemplateError {
     AlreadyEmpty,
     CannotAdd(usize),
+    DelayOutOfBound(usize),
+    CannotCalculateTime,
+    DelayNotFound,
 }
 
 impl Display for TemplateError {
@@ -16,6 +19,15 @@ impl Display for TemplateError {
             }
             TemplateError::CannotAdd(n) => {
                 write!(f, "cannot add {}", n)
+            }
+            TemplateError::DelayOutOfBound(delay) => {
+                write!(f, "cannot wait {} seconds", delay)
+            }
+            TemplateError::CannotCalculateTime => {
+                write!(f, "error calculating time")
+            }
+            TemplateError::DelayNotFound => {
+                write!(f, "delay not found")
             }
         }
     }

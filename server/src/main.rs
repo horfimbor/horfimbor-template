@@ -3,18 +3,19 @@ mod controller;
 #[macro_use]
 extern crate rocket;
 
-use crate::controller::{cached_dto_html, index, stream_dto, template_command};
+use crate::controller::{index, stream_dto, template_command};
 use anyhow::{Context, Result};
+use chrono_craft_engine::cache_db::redis::RedisStateDb;
+use chrono_craft_engine::repository::{DtoRepository, Repository, StateRepository};
 use eventstore::Client;
-use gyg_eventsource::cache_db::redis::RedisStateDb;
-use gyg_eventsource::repository::{DtoRepository, Repository, StateRepository};
-use gyg_eventsource::Stream;
 use rocket::fs::{relative, FileServer};
 use rocket::http::Method;
 use rocket::response::content::RawHtml;
-use rocket::tokio;
+use rocket::response::Redirect;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
+use std::env;
+use std::net::Ipv4Addr;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
@@ -24,18 +25,22 @@ type TemplateDtoCache = RedisStateDb<TemplateDto>;
 type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
 
 const STREAM_NAME: &str = "template2";
-const GROUP_NAME: &str = "t2";
+
+mod built_info {
+    include!(concat!(env!("OUT_DIR"), "/built.rs"));
+}
 
 #[rocket::main]
 async fn main() -> Result<()> {
-    let settings = "esdb://admin:changeit@localhost:2113?tls=false&tlsVerifyCert=false"
-        .to_string()
+    let settings = env::var("EVENTSTORE_URI")
+        .context("fail to get EVENTSTORE_URI env var")?
         .parse()
         .context("fail to parse the settings")?;
 
-    let event_store_db = Client::new(settings).context("fail to connect to eventstore db")?;
+    let redis_client =
+        redis::Client::open(env::var("REDIS_URI").context("fail to get REDIS_URI env var")?)?;
 
-    let redis_client = redis::Client::open("redis://localhost:6379/")?;
+    let event_store_db = Client::new(settings).context("fail to connect to eventstore db")?;
 
     let repo_state = TemplateRepository::new(
         event_store_db.clone(),
@@ -45,12 +50,6 @@ async fn main() -> Result<()> {
     let dto_redis = TemplateDtoCache::new(redis_client.clone());
 
     let repo_dto = TemplateDtoRepository::new(event_store_db, dto_redis.clone());
-
-    let repo_dto_spawn = repo_dto.clone();
-    tokio::spawn(async move {
-        let stream = Stream::Stream(STREAM_NAME);
-        repo_dto_spawn.cache_dto(&stream, GROUP_NAME).await
-    });
 
     let cors = rocket_cors::CorsOptions {
         allowed_origins: AllowedOrigins::some_exact(&[
@@ -70,16 +69,14 @@ async fn main() -> Result<()> {
 
     let figment = rocket::Config::figment()
         .merge(("port", 8000))
+        .merge(("address", Ipv4Addr::new(0, 0, 0, 0)))
         .merge(("template_dir", "server/templates"));
     let _rocket = rocket::custom(figment)
         .manage(repo_state)
         .manage(repo_dto)
         .manage(dto_redis)
-        .mount("/", routes![index])
-        .mount(
-            "/api",
-            routes![template_command, cached_dto_html, stream_dto],
-        )
+        .mount("/", routes![index, redirect_index_js])
+        .mount("/api", routes![template_command, stream_dto])
         .mount("/", FileServer::from(relative!("web")))
         .attach(cors)
         .attach(Template::fairing())
@@ -88,6 +85,14 @@ async fn main() -> Result<()> {
         .await;
 
     Ok(())
+}
+
+#[get("/template/index.js")]
+fn redirect_index_js() -> Redirect {
+    Redirect::temporary(format!(
+        "/template/index-v{}.js",
+        built_info::PKG_VERSION.replace('.', "-")
+    ))
 }
 
 #[catch(404)]

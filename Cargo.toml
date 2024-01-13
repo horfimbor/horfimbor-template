@@ -2,17 +2,28 @@
 resolver = "2"
 members = [
     "client",
+    "consumer",
     "server",
     "shared",
     "state"
 ]
 
 [workspace.dependencies]
-gyg-eventsource = {git= "https://github.com/galakhygame/gyg-eventsource", branch = "main"}
-rocket = { version = "0.5.0-rc.3", features = ["json"] }
-serde = { version = "1.0.171", features = ["derive"] }
+chrono-craft-engine = {git= "https://github.com/ChronoCraftEngine/chrono-craft-engine", branch = "update-redis"}
+#chrono-craft-engine = {path = "../chrono-craft-engine"}
+anyhow = "1.0"
+clap = { version = "4.4", features = ["derive"] }
+redis= { version = "0.24", features = ["tokio-rustls-comp"] }
+rocket = { version = "0.5", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 thiserror = "1.0"
 eventstore = "2.2"
 uuid = { version = "1.1", features = ["v4", "serde"] }
 
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+unwrap_used = "warn"

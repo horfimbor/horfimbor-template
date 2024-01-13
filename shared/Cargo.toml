@@ -6,9 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-gyg-eventsource = { workspace = true, optional = true }
+chrono-craft-engine = { workspace = true, optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
-server = ["gyg-eventsource"]
+server = ["chrono-craft-engine"]
+
+
+[lints]
+workspace = true

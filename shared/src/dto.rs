@@ -1,5 +1,5 @@
 #[cfg(feature = "server")]
-use gyg_eventsource::Dto;
+use chrono_craft_engine::Dto;
 
 #[cfg(feature = "server")]
 use crate::error::TemplateError;
@@ -34,6 +34,8 @@ impl TemplateDto {
         match event {
             TemplateEvent::Added(nb) => self.last_ten.push(('+', *nb)),
             TemplateEvent::Removed(nb) => self.last_ten.push(('-', *nb)),
+            TemplateEvent::Delayed(_) => {}
+            TemplateEvent::DelayDone(_) => {}
         };
         if self.last_ten.len() > 10 {
             self.last_ten.remove(0);
