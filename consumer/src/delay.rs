@@ -1,13 +1,13 @@
 use crate::{TemplateRepository, TemplateStateCache};
-use anyhow::Result;
-use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
+use anyhow::{Context, Error, Result};
 use chrono_craft_engine::model_key::ModelKey;
 use chrono_craft_engine::repository::Repository;
-use chrono_craft_engine::Stream;
+use chrono_craft_engine::{Event, Stream};
+use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
 use redis::Client as Redis;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use template_shared::command::TemplateCommand;
-use template_shared::event::TemplateEvent;
+use template_shared::event::{Delayed, TemplateEvent};
 use tokio::time::sleep;
 
 pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Result<()> {
@@ -16,13 +16,18 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
         TemplateStateCache::new(redis_client.clone()),
     );
 
-    let stream = Stream::Event("evt.delayed");
+    let e = TemplateEvent::Delayed(Delayed {
+        id: 0,
+        timestamp: 0,
+        to_add: 0,
+    });
+    let stream = Stream::Event(e.event_name());
     let group_name = "bob";
 
     repo_state
         .create_subscription(&stream, group_name)
         .await
-        .unwrap();
+        .context("cannot create subscription")?;
 
     let options = SubscribeToPersistentSubscriptionOptions::default().buffer_size(1);
 
@@ -30,22 +35,27 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
         .event_db()
         .subscribe_to_persistent_subscription(stream.to_string(), group_name, &options)
         .await
-        .unwrap();
+        .context("cannot subscribe")?;
 
     loop {
         let repo_state = repo_state.clone();
-        let rcv_event = sub.next().await.unwrap();
+        let rcv_event = sub.next().await.context("cannot get next event")?;
 
-        let event = rcv_event.event.as_ref().unwrap();
+        let event = rcv_event.event.as_ref().context("cannot extract event")?;
 
-        let json = event.as_json::<TemplateEvent>().unwrap();
+        let json = event
+            .as_json::<TemplateEvent>()
+            .context("cannot extract json")?;
 
         if let TemplateEvent::Delayed(delayed) = json {
             let key = ModelKey::from(event.stream_id.as_str());
 
             tokio::spawn(async move {
                 let now = SystemTime::now();
-                let epoch = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+                let epoch = now
+                    .duration_since(UNIX_EPOCH)
+                    .context("cannot get timestamp")?
+                    .as_secs();
 
                 let to_wait = delayed.timestamp as i64 - epoch as i64;
                 dbg!(to_wait);
@@ -56,12 +66,14 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
                 let s = repo_state
                     .add_command(&key, TemplateCommand::Finalize(delayed.id), None)
                     .await
-                    .unwrap();
+                    .context("cannot add command")?;
 
                 dbg!(s);
+
+                Ok::<(), Error>(())
             });
         }
-        sub.ack(rcv_event).await.unwrap();
+        sub.ack(rcv_event).await.context("cannot ack")?;
     }
 
     Ok(())

@@ -5,17 +5,17 @@ extern crate rocket;
 
 use crate::controller::{index, stream_dto, template_command};
 use anyhow::{Context, Result};
-use eventstore::Client;
 use chrono_craft_engine::cache_db::redis::RedisStateDb;
 use chrono_craft_engine::repository::{DtoRepository, Repository, StateRepository};
+use eventstore::Client;
 use rocket::fs::{relative, FileServer};
 use rocket::http::Method;
 use rocket::response::content::RawHtml;
+use rocket::response::Redirect;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
 use std::env;
 use std::net::Ipv4Addr;
-use rocket::response::Redirect;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
@@ -32,7 +32,6 @@ mod built_info {
 
 #[rocket::main]
 async fn main() -> Result<()> {
-
     let settings = env::var("EVENTSTORE_URI")
         .context("fail to get EVENTSTORE_URI env var")?
         .parse()
@@ -70,7 +69,7 @@ async fn main() -> Result<()> {
 
     let figment = rocket::Config::figment()
         .merge(("port", 8000))
-        .merge(("address",Ipv4Addr::new(0, 0, 0, 0)))
+        .merge(("address", Ipv4Addr::new(0, 0, 0, 0)))
         .merge(("template_dir", "server/templates"));
     let _rocket = rocket::custom(figment)
         .manage(repo_state)
@@ -95,7 +94,6 @@ fn redirect_index_js() -> Redirect {
         built_info::PKG_VERSION.replace('.', "-")
     ))
 }
-
 
 #[catch(404)]
 fn general_not_found() -> RawHtml<&'static str> {

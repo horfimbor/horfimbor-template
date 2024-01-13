@@ -3,10 +3,10 @@ mod dto;
 mod state;
 
 use anyhow::{Context, Result};
-use clap::{Parser, ValueEnum};
-use eventstore::Client;
 use chrono_craft_engine::cache_db::redis::RedisStateDb;
 use chrono_craft_engine::repository::{DtoRepository, StateRepository};
+use clap::{Parser, ValueEnum};
+use eventstore::Client;
 use std::env;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;

@@ -1,8 +1,8 @@
 use crate::{TemplateDtoCache, TemplateDtoRepository, GROUP_NAME, STREAM_NAME};
 use anyhow::Result;
-use eventstore::Client;
 use chrono_craft_engine::repository::Repository;
 use chrono_craft_engine::Stream;
+use eventstore::Client;
 use redis::Client as Redis;
 
 pub async fn cache_dto(redis_client: Redis, event_store_db: Client) -> Result<()> {

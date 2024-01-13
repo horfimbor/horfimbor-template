@@ -20,10 +20,7 @@ pub async fn template_command(
     cookies: &CookieJar<'_>,
     command: Json<TemplateCommand>,
 ) -> Result<(), String> {
-    let uuid = match get_uuid_from_cookies(cookies) {
-        Ok(value) => value,
-        Err(value) => return value,
-    };
+    let uuid = get_uuid_from_cookies(cookies)?;
 
     let key = ModelKey::new(STREAM_NAME, uuid);
     state_repository
@@ -34,17 +31,18 @@ pub async fn template_command(
     Ok(())
 }
 
-fn get_uuid_from_cookies(cookies: &CookieJar) -> Result<String, Result<(), String>> {
+fn get_uuid_from_cookies(cookies: &CookieJar) -> Result<String, String> {
     let uuid = match cookies.get("uuid") {
         None => {
-            return Err(Err("no cookies".to_string()));
+            return Err("no cookies".to_string());
         }
         Some(crumb) => crumb.to_string(),
     }
-    .split("=")
+    .split('=')
     .last()
-    .unwrap()
+    .ok_or("invalid cookie".to_string())?
     .to_string();
+
     Ok(uuid)
 }
 
