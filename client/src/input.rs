@@ -1,14 +1,15 @@
+use bounce::{Atom, use_atom};
 use bounce::BounceRoot;
-use bounce::{use_atom, Atom};
 use reqwasm::http::{Request, Response};
 use web_sys::HtmlInputElement;
 use weblog::console_info;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 
-use crate::API_BASE_URL;
 use template_shared::command::{Delay, TemplateCommand};
 use template_shared::dto::TemplateDto;
+
+use crate::API_BASE_URL;
 
 const DEFAULT_TO_ADD: usize = 42;
 const DEFAULT_DELAY: usize = 2;

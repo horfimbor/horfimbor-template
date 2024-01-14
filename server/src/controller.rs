@@ -1,4 +1,3 @@
-use crate::{TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
 use chrono::prelude::*;
 use chrono_craft_engine::cache_db::CacheDb;
 use chrono_craft_engine::metadata::Metadata;
@@ -10,9 +9,12 @@ use rocket::response::stream::{Event, EventStream};
 use rocket::serde::json::Json;
 use rocket::State;
 use rocket_dyn_templates::{context, Template};
+use uuid::Uuid;
+
 use template_shared::command::TemplateCommand;
 use template_shared::event::TemplateEvent;
-use uuid::Uuid;
+
+use crate::{STREAM_NAME, TemplateDtoCache, TemplateDtoRepository, TemplateRepository};
 
 #[post("/", format = "json", data = "<command>")]
 pub async fn template_command(

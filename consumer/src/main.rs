@@ -1,15 +1,17 @@
-mod delay;
-mod dto;
-mod state;
+use std::env;
 
 use anyhow::{Context, Result};
 use chrono_craft_engine::cache_db::redis::RedisStateDb;
 use chrono_craft_engine::repository::{DtoRepository, StateRepository};
 use clap::{Parser, ValueEnum};
 use eventstore::Client;
-use std::env;
+
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
+
+mod delay;
+mod dto;
+mod state;
 
 type TemplateStateCache = RedisStateDb<TemplateState>;
 type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;

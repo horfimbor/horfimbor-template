@@ -1,12 +1,15 @@
-use chrono_craft_engine::{Dto, State};
-use serde::{Deserialize, Serialize};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+use chrono_craft_engine::{Dto, State, StateName, StateNamed};
+use chrono_craft_engine::chrono_craft_engine_derive::StateNamed;
+use serde::{Deserialize, Serialize};
+
 use template_shared::command::TemplateCommand;
 use template_shared::error::TemplateError;
 use template_shared::event::{Delayed, TemplateEvent};
 use template_shared::START_VALUE;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone, StateNamed)]
 pub struct TemplateState {
     value: usize,
     last_id: usize,

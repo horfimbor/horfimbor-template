@@ -6,9 +6,10 @@ use weblog::console_info;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 
-use crate::API_BASE_URL;
 use template_shared::dto::TemplateDto;
 use template_shared::event::TemplateEvent;
+
+use crate::API_BASE_URL;
 
 #[allow(dead_code)]
 pub struct TemplateState {

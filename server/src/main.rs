@@ -1,23 +1,26 @@
-mod controller;
-
 #[macro_use]
 extern crate rocket;
 
-use crate::controller::{index, stream_dto, template_command};
+use std::env;
+use std::net::Ipv4Addr;
+
 use anyhow::{Context, Result};
 use chrono_craft_engine::cache_db::redis::RedisStateDb;
 use chrono_craft_engine::repository::{DtoRepository, Repository, StateRepository};
 use eventstore::Client;
-use rocket::fs::{relative, FileServer};
+use rocket::fs::{FileServer, relative};
 use rocket::http::Method;
 use rocket::response::content::RawHtml;
 use rocket::response::Redirect;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
-use std::env;
-use std::net::Ipv4Addr;
+
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
+
+use crate::controller::{index, stream_dto, template_command};
+
+mod controller;
 
 type TemplateStateCache = RedisStateDb<TemplateState>;
 type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;

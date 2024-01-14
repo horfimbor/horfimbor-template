@@ -9,7 +9,7 @@ members = [
 ]
 
 [workspace.dependencies]
-chrono-craft-engine = {git= "https://github.com/ChronoCraftEngine/chrono-craft-engine", branch = "update-redis"}
+chrono-craft-engine = {git= "https://github.com/ChronoCraftEngine/chrono-craft-engine", branch = "main"}
 #chrono-craft-engine = {path = "../chrono-craft-engine"}
 anyhow = "1.0"
 clap = { version = "4.4", features = ["derive"] }

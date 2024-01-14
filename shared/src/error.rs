@@ -1,5 +1,6 @@
-use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
+
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Error, Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]

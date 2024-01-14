@@ -1,14 +1,17 @@
-use crate::{TemplateRepository, TemplateStateCache};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
 use anyhow::{Context, Error, Result};
+use chrono_craft_engine::{Event, Stream};
 use chrono_craft_engine::model_key::ModelKey;
 use chrono_craft_engine::repository::Repository;
-use chrono_craft_engine::{Event, Stream};
 use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
 use redis::Client as Redis;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use tokio::time::sleep;
+
 use template_shared::command::TemplateCommand;
 use template_shared::event::{Delayed, TemplateEvent};
-use tokio::time::sleep;
+
+use crate::{TemplateRepository, TemplateStateCache};
 
 pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Result<()> {
     let repo_state = TemplateRepository::new(
