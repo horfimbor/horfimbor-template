@@ -3,8 +3,8 @@ mod dto;
 mod state;
 
 use anyhow::{Context, Result};
-use chrono_craft_engine::cache_db::redis::RedisStateDb;
-use chrono_craft_engine::repository::{DtoRepository, StateRepository};
+use horfimbor_eventsource::cache_db::redis::RedisStateDb;
+use horfimbor_eventsource::repository::{DtoRepository, StateRepository};
 use clap::{Parser, ValueEnum};
 use eventstore::Client;
 use std::env;

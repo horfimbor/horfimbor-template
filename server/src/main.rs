@@ -5,8 +5,8 @@ extern crate rocket;
 
 use crate::controller::{index, stream_dto, template_command};
 use anyhow::{Context, Result};
-use chrono_craft_engine::cache_db::redis::RedisStateDb;
-use chrono_craft_engine::repository::{DtoRepository, Repository, StateRepository};
+use horfimbor_eventsource::cache_db::redis::RedisStateDb;
+use horfimbor_eventsource::repository::{DtoRepository, Repository, StateRepository};
 use eventstore::Client;
 use rocket::fs::{relative, FileServer};
 use rocket::http::Method;

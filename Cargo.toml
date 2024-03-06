@@ -9,8 +9,8 @@ members = [
 ]
 
 [workspace.dependencies]
-chrono-craft-engine = {git= "https://github.com/ChronoCraftEngine/chrono-craft-engine", branch = "update-redis"}
-#chrono-craft-engine = {path = "../chrono-craft-engine"}
+#horfimbor-eventsource = {path = "../horfimbor-engine/horfimbor-eventsource"}
+horfimbor-eventsource = "0.1"
 anyhow = "1.0"
 clap = { version = "4.4", features = ["derive"] }
 redis= { version = "0.24", features = ["tokio-rustls-comp"] }

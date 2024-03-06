@@ -1,5 +1,5 @@
 #[cfg(feature = "server")]
-use chrono_craft_engine::Dto;
+use horfimbor_eventsource::Dto;
 
 #[cfg(feature = "server")]
 use crate::error::TemplateError;

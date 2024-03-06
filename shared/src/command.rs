@@ -1,7 +1,7 @@
 #[cfg(feature = "server")]
-use chrono_craft_engine::chrono_craft_engine_derive::Command;
+use horfimbor_eventsource::horfimbor_eventsource_derive::Command;
 #[cfg(feature = "server")]
-use chrono_craft_engine::{Command, CommandName};
+use horfimbor_eventsource::{Command, CommandName};
 
 use serde::{Deserialize, Serialize};
 

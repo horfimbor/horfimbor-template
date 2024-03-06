@@ -374,35 +374,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "chrono-craft-engine"
-version = "0.0.1"
-source = "git+https://github.com/ChronoCraftEngine/chrono-craft-engine?branch=update-redis#fb5096770012c7820e0d48d65984428abc0ca020"
-dependencies = [
- "async-trait",
- "chrono",
- "chrono-craft-engine-derive",
- "eventstore",
- "futures",
- "redis",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "uuid",
-]
-
-[[package]]
-name = "chrono-craft-engine-derive"
-version = "0.1.0"
-source = "git+https://github.com/ChronoCraftEngine/chrono-craft-engine?branch=update-redis#fb5096770012c7820e0d48d65984428abc0ca020"
-dependencies = [
- "convert_case",
- "proc-macro2",
- "quote",
- "syn 2.0.46",
-]
-
-[[package]]
 name = "chrono-tz"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -802,6 +773,46 @@ name = "eventstore"
 version = "2.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "aed2fb745dbed1198287dc2f3cf532cecd8735f370d3fe564ce453335e99da37"
+dependencies = [
+ "async-stream",
+ "base64 0.13.1",
+ "bitflags 2.4.1",
+ "byteorder",
+ "bytes",
+ "chrono",
+ "eventstore-macros",
+ "futures",
+ "http",
+ "hyper",
+ "hyper-rustls 0.23.2",
+ "log",
+ "nom",
+ "prost",
+ "prost-derive",
+ "prost-types",
+ "rand",
+ "reqwest",
+ "rustls 0.20.9",
+ "rustls-native-certs",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tokio-rustls 0.23.4",
+ "tonic",
+ "tonic-build",
+ "tower",
+ "url",
+ "urlencoding",
+ "uuid",
+ "webpki",
+]
+
+[[package]]
+name = "eventstore"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "344740b4852649df4e483a581df1f2938a92f0409a4c298033aaae0ed582f72e"
 dependencies = [
  "async-stream",
  "base64 0.13.1",
@@ -1525,6 +1536,37 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "horfimbor-eventsource"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "73d62997be803cb8b09f714bcb5646eecff50b011d327c5a435ccef4a94c7558"
+dependencies = [
+ "async-trait",
+ "chrono",
+ "eventstore 3.0.0",
+ "futures",
+ "horfimbor-eventsource-derive",
+ "redis",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
+name = "horfimbor-eventsource-derive"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c9ccac1cb75ecbe411804c76df5a851bc1bf96994917e2707c55180e00ab72d"
+dependencies = [
+ "convert_case",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.46",
 ]
 
 [[package]]
@@ -3311,9 +3353,9 @@ name = "template-consumer"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "chrono-craft-engine",
  "clap",
- "eventstore",
+ "eventstore 2.3.0",
+ "horfimbor-eventsource",
  "redis",
  "template-shared",
  "template-state",
@@ -3327,9 +3369,9 @@ dependencies = [
  "anyhow",
  "built",
  "chrono",
- "chrono-craft-engine",
  "clap",
- "eventstore",
+ "eventstore 2.3.0",
+ "horfimbor-eventsource",
  "redis",
  "rocket",
  "rocket_cors",
@@ -3346,7 +3388,7 @@ dependencies = [
 name = "template-shared"
 version = "0.1.0"
 dependencies = [
- "chrono-craft-engine",
+ "horfimbor-eventsource",
  "serde",
  "thiserror",
 ]
@@ -3357,8 +3399,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
- "chrono-craft-engine",
  "cucumber",
+ "horfimbor-eventsource",
  "serde",
  "template-shared",
  "tokio",

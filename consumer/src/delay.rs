@@ -1,8 +1,8 @@
 use crate::{TemplateRepository, TemplateStateCache};
 use anyhow::{Context, Error, Result};
-use chrono_craft_engine::model_key::ModelKey;
-use chrono_craft_engine::repository::Repository;
-use chrono_craft_engine::{Event, Stream};
+use horfimbor_eventsource::model_key::ModelKey;
+use horfimbor_eventsource::repository::Repository;
+use horfimbor_eventsource::{Event, Stream};
 use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
 use redis::Client as Redis;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
