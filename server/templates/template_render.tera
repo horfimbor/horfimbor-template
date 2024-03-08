@@ -1,9 +1,9 @@
 
 
 <fieldset style="float:right">
-    <gyg-template-state></gyg-template-state>
+    <horfimbor-template-state></horfimbor-template-state>
 </fieldset>
 
 <fieldset>
-    <gyg-template-input></gyg-template-input>
+    <horfimbor-template-input></horfimbor-template-input>
 </fieldset>

@@ -62,6 +62,6 @@ impl CustomElement for ComponentWrapperInput {
 
 #[wasm_bindgen]
 pub fn run() {
-    ComponentWrapperState::define("gyg-template-state");
-    ComponentWrapperInput::define("gyg-template-input");
+    ComponentWrapperState::define("horfimbor-template-state");
+    ComponentWrapperInput::define("horfimbor-template-input");
 }

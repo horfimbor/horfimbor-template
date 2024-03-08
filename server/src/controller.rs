@@ -1,10 +1,10 @@
 use crate::{TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
 use chrono::prelude::*;
-use chrono_craft_engine::cache_db::CacheDb;
-use chrono_craft_engine::metadata::Metadata;
-use chrono_craft_engine::model_key::ModelKey;
-use chrono_craft_engine::repository::Repository;
-use chrono_craft_engine::Stream;
+use horfimbor_eventsource::cache_db::CacheDb;
+use horfimbor_eventsource::metadata::Metadata;
+use horfimbor_eventsource::model_key::ModelKey;
+use horfimbor_eventsource::repository::Repository;
+use horfimbor_eventsource::Stream;
 use rocket::http::{Cookie, CookieJar};
 use rocket::response::stream::{Event, EventStream};
 use rocket::serde::json::Json;

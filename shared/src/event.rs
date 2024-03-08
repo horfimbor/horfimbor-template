@@ -1,9 +1,11 @@
 #[cfg(feature = "server")]
-use chrono_craft_engine::chrono_craft_engine_derive::Event;
+use horfimbor_eventsource::horfimbor_eventsource_derive::Event;
 #[cfg(feature = "server")]
-use chrono_craft_engine::{Event, EventName};
+use horfimbor_eventsource::{Event, EventName, StateNamed};
 
 use serde::{Deserialize, Serialize};
+
+use crate::TemplateState;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Delayed {
@@ -13,6 +15,7 @@ pub struct Delayed {
 }
 
 #[cfg_attr(feature = "server", derive(Event))]
+#[cfg_attr(feature = "server", state(TemplateState))]
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum TemplateEvent {
     Added(usize),

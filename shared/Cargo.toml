@@ -6,12 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono-craft-engine = { workspace = true, optional = true }
+horfimbor-eventsource = { workspace = true, optional = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 
 [features]
-server = ["chrono-craft-engine"]
+server = ["horfimbor-eventsource"]
 
 
 [lints]
