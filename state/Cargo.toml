@@ -13,10 +13,10 @@ template-shared = { path = "../shared", features = ["server"] }
 
 
 [dev-dependencies]
-tokio = { version = "1.21" , features = ["rt", "rt-multi-thread", "macros"]}
+tokio = { version = "1.21", features = ["rt", "rt-multi-thread", "macros"] }
 async-trait = "0.1"
 cucumber = { version = "0.20.0" }
-anyhow= {workspace = true}
+anyhow = { workspace = true }
 
 [[test]]
 name = "template-state-test" # this should be the same as the filename of your test target
