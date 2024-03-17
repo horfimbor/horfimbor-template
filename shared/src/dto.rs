@@ -16,7 +16,7 @@ pub struct TemplateDto {
 
 impl Default for TemplateDto {
     fn default() -> Self {
-        TemplateDto {
+        Self {
             last_ten: vec![('+', START_VALUE)],
             average: START_VALUE as f32,
         }
@@ -24,8 +24,8 @@ impl Default for TemplateDto {
 }
 
 impl TemplateDto {
-    pub fn empty() -> Self {
-        TemplateDto {
+    #[must_use] pub fn empty() -> Self {
+        Self {
             last_ten: vec![],
             average: 0.0,
         }
@@ -49,10 +49,10 @@ impl TemplateDto {
         }
         self.average = sum as f32 / self.last_ten.len() as f32;
     }
-    pub fn last_ten(&self) -> &Vec<(char, usize)> {
+    #[must_use] pub fn last_ten(&self) -> &Vec<(char, usize)> {
         &self.last_ten
     }
-    pub fn average(&self) -> f32 {
+    #[must_use] pub fn average(&self) -> f32 {
         self.average
     }
 }
@@ -63,6 +63,6 @@ impl Dto for TemplateDto {
     type Error = TemplateError;
 
     fn play_event(&mut self, event: &Self::Event) {
-        self.play_event(event)
+        self.play_event(event);
     }
 }

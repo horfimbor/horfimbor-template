@@ -1,11 +1,11 @@
 #[cfg(feature = "server")]
 use horfimbor_eventsource::horfimbor_eventsource_derive::Event;
 #[cfg(feature = "server")]
-use horfimbor_eventsource::{Event, EventName, StateNamed};
+use horfimbor_eventsource::{Event, EventName};
+
 
 use serde::{Deserialize, Serialize};
 
-use crate::TemplateState;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Delayed {
@@ -15,7 +15,7 @@ pub struct Delayed {
 }
 
 #[cfg_attr(feature = "server", derive(Event))]
-#[cfg_attr(feature = "server", state(TemplateState))]
+#[cfg_attr(feature = "server", state(TEMPLATE_STATE_NAME))]
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum TemplateEvent {
     Added(usize),
@@ -27,14 +27,14 @@ pub enum TemplateEvent {
 impl ToString for TemplateEvent {
     fn to_string(&self) -> String {
         match self {
-            TemplateEvent::Added(n) => {
-                format!("+{}", n)
+            Self::Added(n) => {
+                format!("+{n}")
             }
-            TemplateEvent::Removed(n) => {
-                format!("-{}", n)
+            Self::Removed(n) => {
+                format!("-{n}")
             }
-            TemplateEvent::Delayed(_) => "~~~".to_string(),
-            TemplateEvent::DelayDone(_) => "~!~".to_string(),
+            Self::Delayed(_) => "~~~".to_string(),
+            Self::DelayDone(_) => "~!~".to_string(),
         }
     }
 }

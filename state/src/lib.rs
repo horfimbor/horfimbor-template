@@ -5,8 +5,10 @@ use template_shared::command::TemplateCommand;
 use template_shared::error::TemplateError;
 use template_shared::event::{Delayed, TemplateEvent};
 use template_shared::{START_VALUE, TEMPLATE_STATE_NAME};
+use horfimbor_eventsource::horfimbor_eventsource_derive::StateNamed;
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone, StateNamed)]
+#[state(TEMPLATE_STATE_NAME)]
 pub struct TemplateState {
     value: usize,
     last_id: usize,
@@ -14,14 +16,14 @@ pub struct TemplateState {
 }
 
 impl TemplateState {
-    pub fn get_value(&self) -> usize {
+    #[must_use] pub fn get_value(&self) -> usize {
         self.value
     }
 }
 
 impl Default for TemplateState {
     fn default() -> Self {
-        TemplateState {
+        Self {
             value: START_VALUE,
             last_id: 0,
             delayed: vec![],
@@ -50,12 +52,6 @@ impl Dto for TemplateState {
                     .collect();
             }
         }
-    }
-}
-
-impl StateNamed for TemplateState {
-    fn state_name() -> StateName {
-        TEMPLATE_STATE_NAME
     }
 }
 

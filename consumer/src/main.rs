@@ -3,7 +3,7 @@ mod dto;
 mod state;
 
 use anyhow::{Context, Result};
-use horfimbor_eventsource::cache_db::redis::RedisStateDb;
+use horfimbor_eventsource::cache_db::redis::StateDb;
 use horfimbor_eventsource::repository::{DtoRepository, StateRepository};
 use clap::{Parser, ValueEnum};
 use eventstore::Client;
@@ -11,9 +11,9 @@ use std::env;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
-type TemplateStateCache = RedisStateDb<TemplateState>;
+type TemplateStateCache = StateDb<TemplateState>;
 type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;
-type TemplateDtoCache = RedisStateDb<TemplateDto>;
+type TemplateDtoCache = StateDb<TemplateDto>;
 type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
 
 const STREAM_NAME: &str = "template2";

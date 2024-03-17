@@ -14,19 +14,19 @@ pub enum TemplateError {
 impl Display for TemplateError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            TemplateError::AlreadyEmpty => {
+            Self::AlreadyEmpty => {
                 write!(f, "cannot empty an empty state")
             }
-            TemplateError::CannotAdd(n) => {
-                write!(f, "cannot add {}", n)
+            Self::CannotAdd(n) => {
+                write!(f, "cannot add {n}")
             }
-            TemplateError::DelayOutOfBound(delay) => {
-                write!(f, "cannot wait {} seconds", delay)
+            Self::DelayOutOfBound(delay) => {
+                write!(f, "cannot wait {delay} seconds")
             }
-            TemplateError::CannotCalculateTime => {
+            Self::CannotCalculateTime => {
                 write!(f, "error calculating time")
             }
-            TemplateError::DelayNotFound => {
+            Self::DelayNotFound => {
                 write!(f, "delay not found")
             }
         }

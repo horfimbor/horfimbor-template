@@ -10,15 +10,15 @@ members = [
 
 [workspace.dependencies]
 #horfimbor-eventsource = {path = "../horfimbor-engine/horfimbor-eventsource"}
-horfimbor-eventsource = "0.1"
+horfimbor-eventsource = "0.2"
 anyhow = "1.0"
 clap = { version = "4.4", features = ["derive"] }
-redis= { version = "0.24", features = ["tokio-rustls-comp"] }
+redis= { version = "0.25", features = ["tokio-rustls-comp"] }
 rocket = { version = "0.5", features = ["json"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1"
 thiserror = "1.0"
-eventstore = "3.0.0"
+eventstore = "3.0"
 uuid = { version = "1.1", features = ["v4", "serde"] }
 
 

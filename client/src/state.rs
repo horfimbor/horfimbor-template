@@ -29,12 +29,12 @@ impl Component for TemplateState {
     type Properties = ();
 
     fn create(ctx: &Context<Self>) -> Self {
-        let mut es = match EventSource::new(format!("{}data", API_BASE_URL).as_str()) {
+        let mut es = match EventSource::new(format!("{API_BASE_URL}data").as_str()) {
             Ok(es) => es,
             Err(_) => {
                 return Self {
                     es: None,
-                    dto: Err(format!("cannot open eventsource to {}data", API_BASE_URL)),
+                    dto: Err(format!("cannot open eventsource to {API_BASE_URL}data")),
                 };
             }
         };

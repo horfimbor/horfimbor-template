@@ -83,7 +83,7 @@ fn local_data_setter() -> Html {
 
     let on_delay_input = {
         let data = data.clone();
-        let err = err.clone();
+        let err = err;
 
         Callback::from(move |e: InputEvent| {
             let input: HtmlInputElement = e.target_unchecked_into();

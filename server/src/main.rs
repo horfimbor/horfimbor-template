@@ -5,7 +5,7 @@ extern crate rocket;
 
 use crate::controller::{index, stream_dto, template_command};
 use anyhow::{Context, Result};
-use horfimbor_eventsource::cache_db::redis::RedisStateDb;
+use horfimbor_eventsource::cache_db::redis::StateDb;
 use horfimbor_eventsource::repository::{DtoRepository, Repository, StateRepository};
 use eventstore::Client;
 use rocket::fs::{relative, FileServer};
@@ -19,9 +19,9 @@ use std::net::Ipv4Addr;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
-type TemplateStateCache = RedisStateDb<TemplateState>;
+type TemplateStateCache = StateDb<TemplateState>;
 type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;
-type TemplateDtoCache = RedisStateDb<TemplateDto>;
+type TemplateDtoCache = StateDb<TemplateDto>;
 type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
 
 const STREAM_NAME: &str = "template2";
@@ -98,8 +98,8 @@ fn redirect_index_js() -> Redirect {
 #[catch(404)]
 fn general_not_found() -> RawHtml<&'static str> {
     RawHtml(
-        r#"
+        r"
         <p>Hmm... This is not the droïd you are looking for, oupsi</p>
-    "#,
+    ",
     )
 }
