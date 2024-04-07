@@ -7,8 +7,8 @@ edition = "2021"
 
 [dependencies]
 horfimbor-eventsource = { workspace = true, optional = true }
-serde = { workspace = true }
-thiserror = { workspace = true }
+serde.workspace = true
+thiserror.workspace = true
 
 [features]
 server = ["horfimbor-eventsource"]

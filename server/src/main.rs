@@ -5,6 +5,7 @@ extern crate rocket;
 
 use crate::controller::{index, stream_dto, template_command};
 use anyhow::{Context, Result};
+use clap::Parser;
 use eventstore::Client;
 use horfimbor_eventsource::cache_db::redis::StateDb;
 use horfimbor_eventsource::repository::{DtoRepository, Repository, StateRepository};
@@ -15,7 +16,6 @@ use rocket::response::Redirect;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
 use std::env;
-use std::net::Ipv4Addr;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
@@ -30,12 +30,31 @@ mod built_info {
     include!(concat!(env!("OUT_DIR"), "/built.rs"));
 }
 
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, default_value_t = false)]
+    real_env: bool,
+}
+
 #[rocket::main]
 async fn main() -> Result<()> {
+    let args = Args::parse();
+
+    if !args.real_env {
+        dotenvy::dotenv().context("cannot get env")?;
+    }
+
     let settings = env::var("EVENTSTORE_URI")
         .context("fail to get EVENTSTORE_URI env var")?
         .parse()
         .context("fail to parse the settings")?;
+
+    let auth_port = env::var("APP_PORT")
+        .context("APP_PORT is not defined")?
+        .parse::<u16>()
+        .context("APP_PORT cannot be parse in u16")?;
+    let auth_host = env::var("APP_HOST").context("APP_HOST is not defined")?;
 
     let redis_client =
         redis::Client::open(env::var("REDIS_URI").context("fail to get REDIS_URI env var")?)?;
@@ -51,11 +70,10 @@ async fn main() -> Result<()> {
 
     let repo_dto = TemplateDtoRepository::new(event_store_db, dto_redis.clone());
 
+    let allowed_origins = AllowedOrigins::some_exact(&[auth_host]);
+
     let cors = rocket_cors::CorsOptions {
-        allowed_origins: AllowedOrigins::some_exact(&[
-            "http://127.0.0.1:8000",
-            "http://localhost:8000",
-        ]),
+        allowed_origins,
         allowed_methods: vec![Method::Get, Method::Post]
             .into_iter()
             .map(From::from)
@@ -68,8 +86,8 @@ async fn main() -> Result<()> {
     .context("fail to create cors")?;
 
     let figment = rocket::Config::figment()
-        .merge(("port", 8000))
-        .merge(("address", Ipv4Addr::new(0, 0, 0, 0)))
+        .merge(("port", auth_port))
+        .merge(("address", "0.0.0.0"))
         .merge(("template_dir", "server/templates"));
     let _rocket = rocket::custom(figment)
         .manage(repo_state)

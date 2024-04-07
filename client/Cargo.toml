@@ -18,8 +18,8 @@ log = "0.4"
 reqwasm = "0.5"
 weblog = "0.3.0"
 wasm-bindgen = "0.2"
-serde = { workspace = true }
-serde_json = { workspace = true }
+serde.workspace = true
+serde_json.workspace = true
 futures = "0.3.28"
 
 [dependencies.web-sys]

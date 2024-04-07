@@ -31,11 +31,17 @@ enum Consumer {
 struct Args {
     #[arg(short, long)]
     consumer: Consumer,
+    #[arg(short, long, default_value_t = false)]
+    real_env: bool,
 }
 
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
+
+    if !args.real_env {
+        dotenvy::dotenv().context("cannot get env")?;
+    }
 
     let settings = env::var("EVENTSTORE_URI")
         .context("fail to get EVENTSTORE_URI env var")?

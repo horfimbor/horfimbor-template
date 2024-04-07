@@ -6,20 +6,21 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-horfimbor-eventsource = { workspace = true }
-clap = { workspace = true }
-serde = { workspace = true }
-eventstore = { workspace = true }
-uuid = { workspace = true }
-thiserror = { workspace = true }
+horfimbor-eventsource.workspace = true
+clap.workspace = true
+serde.workspace = true
+eventstore.workspace = true
+uuid.workspace = true
+thiserror.workspace = true
 template-shared = { path = "../shared", features = ["server"] }
 template-state = { path = "../state" }
 redis= {  workspace = true }
 rocket = { workspace=true, features = ["json"] }
 rocket_cors = "0.6"
-serde_json = { workspace = true }
-anyhow = { workspace = true }
+serde_json.workspace = true
+anyhow.workspace = true
 chrono = "0.4"
+dotenvy.workspace = true
 
 [dependencies.rocket_dyn_templates]
 version = "0.1.0-rc.3"

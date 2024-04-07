@@ -6,8 +6,8 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-horfimbor-eventsource = { workspace = true }
-serde = { workspace = true }
+horfimbor-eventsource.workspace = true
+serde.workspace = true
 template-shared = { path = "../shared", features = ["server"] }
 
 
@@ -16,7 +16,7 @@ template-shared = { path = "../shared", features = ["server"] }
 tokio = { version = "1.21", features = ["rt", "rt-multi-thread", "macros"] }
 async-trait = "0.1"
 cucumber = { version = "0.20.0" }
-anyhow = { workspace = true }
+anyhow.workspace = true
 
 [[test]]
 name = "template-state-test" # this should be the same as the filename of your test target

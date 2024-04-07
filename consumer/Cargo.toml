@@ -6,14 +6,15 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = { workspace = true }
-clap = { workspace = true }
-eventstore = { workspace = true }
-horfimbor-eventsource = { workspace = true }
+anyhow.workspace = true
+clap.workspace = true
+eventstore.workspace = true
+horfimbor-eventsource.workspace = true
 redis= {  workspace = true }
 template-shared = { path = "../shared", features = ["server"] }
 tokio = { version = "1.33", features = ["full"] }
 template-state = { path = "../state" }
+dotenvy.workspace = true
 
 
 [lints]

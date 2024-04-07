@@ -2,45 +2,6 @@ version: "3.4"
 
 services:
 
-  server:
-    build:
-      target: final-server
-      args:
-        RUST_VERSION: 1.75.0
-        WASM_TAG: v0.1.0
-    env_file:
-      - .env.docker
-    ports:
-      - "8000:8000"
-    restart: unless-stopped
-
-  consumer-delay:
-    build:
-      context: .
-      target: final-consumer
-    env_file:
-      - .env.docker
-    command: ["template-consumer", "--consumer", "delay"]
-    restart: unless-stopped
-
-  consumer-dto:
-    build:
-      context: .
-      target: final-consumer
-    env_file:
-      - .env.docker
-    command: ["template-consumer", "--consumer", "dto"]
-    restart: unless-stopped
-
-  consumer-state:
-    build:
-      context: .
-      target: final-consumer
-    env_file:
-      - .env.docker
-    command: ["template-consumer", "--consumer", "state"]
-    restart: unless-stopped
-
   eventstore:
     image: eventstore/eventstore:24.2.0-bookworm-slim
     environment:

@@ -1,3 +1,5 @@
+startup:
+    docker compose up -d
 
 watch-client:
     cargo watch -w client -w shared -- \
@@ -7,13 +9,12 @@ watch-client:
           --out-name index-v0-1-0
 
 watch-server:
-    export $(grep -v '^#' .env.local | xargs) && \
-        cargo watch -w server -w shared -w state -i server/web/ -i server/templates \
+    cargo watch -w server -w shared -w state -i server/web/ -i server/templates \
         -x "run -p template-server"
 
-consume kind:
-    export $(grep -v '^#' .env.local | xargs) && \
-        cargo run -p template-consumer -- --consumer {{kind}}
+watch-consume kind:
+    cargo watch -w consumer -w shared -w state \
+      -x "run -p galaxy-consumer -- --consumer {{kind}}"
 
 precommit:
     cargo fmt
