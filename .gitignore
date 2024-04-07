@@ -14,4 +14,4 @@ target/
 
 /server/web/
 /client/dist/
-/.env.local
+/.env

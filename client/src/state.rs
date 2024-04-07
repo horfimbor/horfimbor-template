@@ -2,8 +2,10 @@ use futures::StreamExt;
 use gloo_net::eventsource::futures::EventSource;
 use serde::Deserialize;
 use serde_json::Error;
+use std::time::Duration;
 use weblog::console_info;
 use yew::platform::spawn_local;
+use yew::platform::time::sleep;
 use yew::prelude::*;
 
 use template_shared::dto::TemplateDto;
@@ -21,6 +23,7 @@ pub enum DtoMessage {
     Dto(TemplateDto),
     Event(TemplateEvent),
     Error(String),
+    Reconnect,
 }
 
 #[derive(Default, Properties, PartialEq)]
@@ -28,30 +31,28 @@ pub struct TemplateStateProps {
     pub endpoint: String,
 }
 
-impl Component for TemplateState {
-    type Message = DtoMessage;
-    type Properties = TemplateStateProps;
+impl TemplateState {
+    fn connect(&mut self, ctx: &Context<Self>) {
+        if self.es.is_some() {
+            return;
+        }
+        self.dto = Ok(TemplateDto::default());
 
-    fn create(ctx: &Context<Self>) -> Self {
         let endpoint = ctx.props().endpoint.clone();
 
         let mut es = match EventSource::new(format!("{endpoint}data").as_str()) {
             Ok(es) => es,
             Err(_) => {
-                return Self {
-                    es: None,
-                    dto: Err(format!("cannot open eventsource to {endpoint}data")),
-                };
+                self.dto = Err(format!("cannot open eventsource to {endpoint}data"));
+                return;
             }
         };
 
         let mut stream = match es.subscribe("message") {
             Ok(stream) => stream,
             Err(_) => {
-                return Self {
-                    es: None,
-                    dto: Err("cannot subscribe to all messages".to_string()),
-                };
+                self.dto = Err("cannot subscribe to all messages".to_string());
+                return;
             }
         };
 
@@ -76,13 +77,26 @@ impl Component for TemplateState {
             console_info!("EventSource Closed");
         });
 
-        Self {
-            es: Some(es),
+        self.es = Some(es);
+    }
+}
+
+impl Component for TemplateState {
+    type Message = DtoMessage;
+    type Properties = TemplateStateProps;
+
+    fn create(ctx: &Context<Self>) -> Self {
+        let mut state = Self {
+            es: None,
             dto: Ok(TemplateDto::default()),
-        }
+        };
+
+        state.connect(ctx);
+
+        state
     }
 
-    fn update(&mut self, _ctx: &Context<Self>, msg: Self::Message) -> bool {
+    fn update(&mut self, ctx: &Context<Self>, msg: Self::Message) -> bool {
         match msg {
             DtoMessage::Dto(d) => {
                 self.dto = Ok(d);
@@ -97,6 +111,25 @@ impl Component for TemplateState {
             },
             DtoMessage::Error(e) => {
                 self.dto = Err(e);
+                self.es = None;
+
+                let link = ctx.link().clone();
+
+                spawn_local(async move {
+                    sleep(Duration::from_secs(5)).await;
+                    link.send_message(DtoMessage::Reconnect);
+                });
+                true
+            }
+            DtoMessage::Reconnect => {
+                self.connect(ctx);
+                if self.dto.is_err() {
+                    let link = ctx.link().clone();
+                    spawn_local(async move {
+                        sleep(Duration::from_secs(5)).await;
+                        link.send_message(DtoMessage::Reconnect);
+                    });
+                }
                 true
             }
         }
