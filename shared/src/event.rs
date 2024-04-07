@@ -2,10 +2,9 @@
 use horfimbor_eventsource::horfimbor_eventsource_derive::Event;
 #[cfg(feature = "server")]
 use horfimbor_eventsource::{Event, EventName};
-
+use std::fmt::Display;
 
 use serde::{Deserialize, Serialize};
-
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Delayed {
@@ -24,9 +23,9 @@ pub enum TemplateEvent {
     DelayDone(usize),
 }
 
-impl ToString for TemplateEvent {
-    fn to_string(&self) -> String {
-        match self {
+impl Display for TemplateEvent {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
             Self::Added(n) => {
                 format!("+{n}")
             }
@@ -35,6 +34,7 @@ impl ToString for TemplateEvent {
             }
             Self::Delayed(_) => "~~~".to_string(),
             Self::DelayDone(_) => "~!~".to_string(),
-        }
+        };
+        write!(f, "{}", str)
     }
 }

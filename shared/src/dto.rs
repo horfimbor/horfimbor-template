@@ -24,7 +24,8 @@ impl Default for TemplateDto {
 }
 
 impl TemplateDto {
-    #[must_use] pub fn empty() -> Self {
+    #[must_use]
+    pub fn empty() -> Self {
         Self {
             last_ten: vec![],
             average: 0.0,
@@ -49,10 +50,12 @@ impl TemplateDto {
         }
         self.average = sum as f32 / self.last_ten.len() as f32;
     }
-    #[must_use] pub fn last_ten(&self) -> &Vec<(char, usize)> {
+    #[must_use]
+    pub fn last_ten(&self) -> &Vec<(char, usize)> {
         &self.last_ten
     }
-    #[must_use] pub fn average(&self) -> f32 {
+    #[must_use]
+    pub fn average(&self) -> f32 {
         self.average
     }
 }

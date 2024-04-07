@@ -3,10 +3,10 @@ mod dto;
 mod state;
 
 use anyhow::{Context, Result};
-use horfimbor_eventsource::cache_db::redis::StateDb;
-use horfimbor_eventsource::repository::{DtoRepository, StateRepository};
 use clap::{Parser, ValueEnum};
 use eventstore::Client;
+use horfimbor_eventsource::cache_db::redis::StateDb;
+use horfimbor_eventsource::repository::{DtoRepository, StateRepository};
 use std::env;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;

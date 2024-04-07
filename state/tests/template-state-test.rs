@@ -1,5 +1,5 @@
-use horfimbor_eventsource::{Dto, State};
 use cucumber::{given, then, when, World};
+use horfimbor_eventsource::{Dto, State};
 use template_shared::command::TemplateCommand::{Add, Reset};
 use template_shared::error::TemplateError;
 use template_shared::event::TemplateEvent;

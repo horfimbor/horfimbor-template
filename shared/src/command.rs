@@ -7,7 +7,6 @@ use horfimbor_eventsource::{Command, CommandName};
 
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct Delay {
     pub delay: usize,

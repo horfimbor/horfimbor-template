@@ -1,9 +1,9 @@
 use crate::{TemplateRepository, TemplateStateCache};
 use anyhow::{Context, Error, Result};
+use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
 use horfimbor_eventsource::model_key::ModelKey;
 use horfimbor_eventsource::repository::Repository;
 use horfimbor_eventsource::{Event, Stream};
-use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
 use redis::Client as Redis;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use template_shared::command::TemplateCommand;

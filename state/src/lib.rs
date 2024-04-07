@@ -1,3 +1,4 @@
+use horfimbor_eventsource::horfimbor_eventsource_derive::StateNamed;
 use horfimbor_eventsource::{Dto, State, StateName, StateNamed};
 use serde::{Deserialize, Serialize};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
@@ -5,7 +6,6 @@ use template_shared::command::TemplateCommand;
 use template_shared::error::TemplateError;
 use template_shared::event::{Delayed, TemplateEvent};
 use template_shared::{START_VALUE, TEMPLATE_STATE_NAME};
-use horfimbor_eventsource::horfimbor_eventsource_derive::StateNamed;
 
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Clone, StateNamed)]
 #[state(TEMPLATE_STATE_NAME)]
@@ -16,7 +16,8 @@ pub struct TemplateState {
 }
 
 impl TemplateState {
-    #[must_use] pub fn get_value(&self) -> usize {
+    #[must_use]
+    pub fn get_value(&self) -> usize {
         self.value
     }
 }
