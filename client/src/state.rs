@@ -6,7 +6,6 @@ use weblog::console_info;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 
-use crate::API_BASE_URL;
 use template_shared::dto::TemplateDto;
 use template_shared::event::TemplateEvent;
 
@@ -24,17 +23,24 @@ pub enum DtoMessage {
     Error(String),
 }
 
+#[derive(Default, Properties, PartialEq)]
+pub struct TemplateStateProps {
+    pub endpoint: String,
+}
+
 impl Component for TemplateState {
     type Message = DtoMessage;
-    type Properties = ();
+    type Properties = TemplateStateProps;
 
     fn create(ctx: &Context<Self>) -> Self {
-        let mut es = match EventSource::new(format!("{API_BASE_URL}data").as_str()) {
+        let endpoint = ctx.props().endpoint.clone();
+
+        let mut es = match EventSource::new(format!("{endpoint}data").as_str()) {
             Ok(es) => es,
             Err(_) => {
                 return Self {
                     es: None,
-                    dto: Err(format!("cannot open eventsource to {API_BASE_URL}data")),
+                    dto: Err(format!("cannot open eventsource to {endpoint}data")),
                 };
             }
         };

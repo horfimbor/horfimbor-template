@@ -23,6 +23,7 @@ type TemplateStateCache = StateDb<TemplateState>;
 type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;
 type TemplateDtoCache = StateDb<TemplateDto>;
 type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
+type Host = String;
 
 const STREAM_NAME: &str = "template2";
 
@@ -55,6 +56,7 @@ async fn main() -> Result<()> {
         .parse::<u16>()
         .context("APP_PORT cannot be parse in u16")?;
     let auth_host = env::var("APP_HOST").context("APP_HOST is not defined")?;
+    let host: Host = auth_host.clone();
 
     let redis_client =
         redis::Client::open(env::var("REDIS_URI").context("fail to get REDIS_URI env var")?)?;
@@ -93,6 +95,7 @@ async fn main() -> Result<()> {
         .manage(repo_state)
         .manage(repo_dto)
         .manage(dto_redis)
+        .manage(host)
         .mount("/", routes![index, redirect_index_js])
         .mount("/api", routes![template_command, stream_dto])
         .mount("/", FileServer::from(relative!("web")))

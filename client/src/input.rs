@@ -6,9 +6,13 @@ use weblog::console_info;
 use yew::platform::spawn_local;
 use yew::prelude::*;
 
-use crate::API_BASE_URL;
 use template_shared::command::{Delay, TemplateCommand};
 use template_shared::dto::TemplateDto;
+
+#[derive(Default, Properties, PartialEq)]
+pub struct TemplateInputProps {
+    pub endpoint: String,
+}
 
 const DEFAULT_TO_ADD: usize = 42;
 const DEFAULT_DELAY: usize = 2;
@@ -116,9 +120,10 @@ fn local_data_setter() -> Html {
 }
 
 #[function_component(Sender)]
-fn sender() -> Html {
+fn sender(props: &TemplateInputProps) -> Html {
     let data = use_atom::<LocalData>();
     let err = use_atom::<LocalError>();
+    let endpoint = props.endpoint.clone();
 
     let on_send_clicked = Callback::from(move |_| {
         let data = data.clone();
@@ -133,8 +138,10 @@ fn sender() -> Html {
             })
         };
 
+        let endpoint = endpoint.clone();
         spawn_local(async move {
-            match send_command(&cmd).await {
+            let endpoint = endpoint.clone();
+            match send_command(&cmd, endpoint).await {
                 Ok(resp) => {
                     if resp.ok() {
                         console_info!("sent !");
@@ -150,8 +157,8 @@ fn sender() -> Html {
     html! { <button id="btn-send" onclick={on_send_clicked}>{"Send"}</button> }
 }
 
-async fn send_command(cmd: &TemplateCommand) -> Result<Response, String> {
-    Request::post(API_BASE_URL)
+async fn send_command(cmd: &TemplateCommand, endpoint: String) -> Result<Response, String> {
+    Request::post(endpoint.as_str())
         .body(serde_json::to_string(&cmd).map_err(|_| format!("cannot serialize cmd {:?}", &cmd))?)
         .header("Content-Type", "application/json")
         .send()
@@ -160,16 +167,19 @@ async fn send_command(cmd: &TemplateCommand) -> Result<Response, String> {
 }
 
 #[function_component(Reset)]
-fn reset() -> Html {
+fn reset(props: &TemplateInputProps) -> Html {
     let err = use_atom::<LocalError>();
+    let endpoint = props.endpoint.clone();
 
     let on_reset_clicked = Callback::from(move |_| {
         let err = err.clone();
+        let endpoint = endpoint.clone();
         spawn_local(async move {
             let cmd = TemplateCommand::Reset;
+            let endpoint = endpoint.clone();
 
             spawn_local(async move {
-                match send_command(&cmd).await {
+                match send_command(&cmd, endpoint).await {
                     Ok(resp) => {
                         if resp.ok() {
                             console_info!("sent !");
@@ -196,21 +206,23 @@ pub struct TemplateInput {}
 
 impl Component for TemplateInput {
     type Message = ();
-    type Properties = ();
+
+    type Properties = TemplateInputProps;
 
     fn create(_ctx: &Context<Self>) -> Self {
         Self {}
     }
 
-    fn view(&self, _ctx: &Context<Self>) -> Html {
+    fn view(&self, ctx: &Context<Self>) -> Html {
+        let endpoint = ctx.props().endpoint.clone();
         html! {
             <BounceRoot>
                 <div>
                     <LocalDataSetter />
-                    <Sender />
+                    <Sender endpoint={endpoint.clone()} />
                 </div>
                 <div>
-                    <Reset />
+                    <Reset endpoint={endpoint.clone()} />
                 </div>
                 <div>
                     <ErrorDisplay />

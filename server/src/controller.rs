@@ -1,4 +1,4 @@
-use crate::{TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
+use crate::{Host, TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
 use chrono::prelude::*;
 use horfimbor_eventsource::cache_db::CacheDb;
 use horfimbor_eventsource::metadata::Metadata;
@@ -106,12 +106,13 @@ pub async fn stream_dto(
 }
 
 #[get("/")]
-pub async fn index() -> Template {
+pub async fn index(host: &State<Host>) -> Template {
     let local: DateTime<Local> = Local::now();
     Template::render(
         "index",
         context! {
-            title: format!("Hello, world! {}",local.format("%x %T"))
+            title: format!("Hello, world! {}",local.format("%x %T")),
+            endpoint: format!("{host}/api/" )
         },
     )
 }
