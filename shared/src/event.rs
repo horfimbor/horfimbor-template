@@ -4,6 +4,8 @@ use horfimbor_eventsource::horfimbor_eventsource_derive::Event;
 use horfimbor_eventsource::{Event, EventName};
 use std::fmt::Display;
 
+use crate::TEMPLATE_STATE_NAME;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]

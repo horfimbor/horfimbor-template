@@ -2,8 +2,8 @@
 use horfimbor_eventsource::horfimbor_eventsource_derive::Command;
 #[cfg(feature = "server")]
 use horfimbor_eventsource::{Command, CommandName};
-// #[cfg(feature = "server")]
-// use crate::TEMPLATE_STATE_NAME;
+
+use crate::TEMPLATE_STATE_NAME;
 
 use serde::{Deserialize, Serialize};
 
