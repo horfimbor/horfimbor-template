@@ -14,7 +14,7 @@ watch-server:
 
 watch-consume kind:
     cargo watch -w consumer -w shared -w state \
-      -x "run -p galaxy-consumer -- --consumer {{kind}}"
+      -x "run -p template-consumer -- --consumer {{kind}}"
 
 precommit:
     cargo fmt

@@ -1,6 +1,7 @@
 use crate::{Host, TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
 use chrono::prelude::*;
 use horfimbor_eventsource::cache_db::CacheDb;
+use horfimbor_eventsource::helper::get_subscription;
 use horfimbor_eventsource::metadata::Metadata;
 use horfimbor_eventsource::model_key::ModelKey;
 use horfimbor_eventsource::repository::Repository;
@@ -22,7 +23,10 @@ pub async fn template_command(
 ) -> Result<(), String> {
     let uuid = get_uuid_from_cookies(cookies)?;
 
-    let key = ModelKey::new(STREAM_NAME, uuid);
+    let key = ModelKey::new(
+        STREAM_NAME,
+        uuid.parse().map_err(|e: uuid::Error| e.to_string())?,
+    );
     state_repository
         .add_command(&key, command.0, None)
         .await
@@ -53,10 +57,10 @@ pub async fn stream_dto(
     cookies: &CookieJar<'_>,
 ) -> Result<EventStream![], String> {
     let uuid = match get_uuid_from_cookies(cookies) {
-        Ok(value) => value,
+        Ok(value) => value.parse().map_err(|e: uuid::Error| e.to_string())?,
         Err(_) => {
-            let uuid = Uuid::new_v4().to_string();
-            cookies.add(Cookie::new("uuid", uuid.clone()));
+            let uuid = Uuid::new_v4();
+            cookies.add(Cookie::new("uuid", uuid.to_string()));
             uuid
         }
     };
@@ -67,9 +71,12 @@ pub async fn stream_dto(
         .map_err(|e| e.to_string())
         .map_err(|_| "cannot find the dto".to_string())?;
 
-    let mut subscription = dto_repository
-        .get_subscription(Stream::Model(key), dto.position())
-        .await;
+    let mut subscription = get_subscription(
+        dto_repository.event_db(),
+        &Stream::Model(key),
+        dto.position(),
+    )
+    .await;
 
     Ok(EventStream! {
         yield Event::json(&dto.state());

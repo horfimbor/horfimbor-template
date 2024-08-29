@@ -7,10 +7,11 @@ members = [
     "shared",
     "state"
 ]
+release = false
 
 [workspace.dependencies]
 #horfimbor-eventsource = {path = "../horfimbor-engine/horfimbor-eventsource"}
-horfimbor-eventsource = "0.2"
+horfimbor-eventsource = "0.3"
 anyhow = "1.0"
 clap = { version = "4.4", features = ["derive"] }
 redis= { version = "0.26", features = ["tokio-rustls-comp"] }

@@ -34,7 +34,6 @@ impl Default for TemplateState {
 
 impl Dto for TemplateState {
     type Event = TemplateEvent;
-    type Error = TemplateError;
 
     fn play_event(&mut self, event: &Self::Event) {
         match event {
@@ -58,6 +57,7 @@ impl Dto for TemplateState {
 
 impl State for TemplateState {
     type Command = TemplateCommand;
+    type Error = TemplateError;
 
     fn try_command(&self, command: Self::Command) -> Result<Vec<Self::Event>, Self::Error> {
         match command {
