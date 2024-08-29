@@ -15,6 +15,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix small bug
 
 ### Other
+- release ([#7](https://github.com/horfimbor/horfimbor-template/pull/7))
+- release ([#6](https://github.com/horfimbor/horfimbor-template/pull/6))
+- update dependencies
+- add reconnect
+- handle endpoint from server
+- upgrade from hfb-galaxy startup
+- Add delay ([#1](https://github.com/horfimbor/horfimbor-template/pull/1))
+- remove unwrap from frontend
+- handle message in yew
+- add sse server and client
+- handle change on gyg-eventsource
+- add template tera
+- use redis for dto and state + create frontend with Yew
+- add Yew as web component
+- allow to load template-shared from the client
+- add dto beside state
+- add tests with cucumber
+- create shared command and events
+
+## [0.1.0](https://github.com/horfimbor/horfimbor-template/releases/tag/template-client-v0.1.0) - 2024-08-29
+
+### Fixed
+- fix : upgrade eventsource
+- naming ([#3](https://github.com/horfimbor/horfimbor-template/pull/3))
+- fix clippy
+- fix small bug
+
+### Other
 - release ([#6](https://github.com/horfimbor/horfimbor-template/pull/6))
 - update dependencies
 - add reconnect
