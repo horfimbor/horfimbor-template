@@ -1,9 +1,6 @@
 #[cfg(feature = "server")]
 use horfimbor_eventsource::Dto;
 
-#[cfg(feature = "server")]
-use crate::error::TemplateError;
-
 use crate::event::TemplateEvent;
 use crate::START_VALUE;
 use serde::{Deserialize, Serialize};
@@ -63,7 +60,6 @@ impl TemplateDto {
 #[cfg(feature = "server")]
 impl Dto for TemplateDto {
     type Event = TemplateEvent;
-    type Error = TemplateError;
 
     fn play_event(&mut self, event: &Self::Event) {
         self.play_event(event);

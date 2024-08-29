@@ -1,6 +1,7 @@
 use crate::{TemplateRepository, TemplateStateCache};
 use anyhow::{Context, Error, Result};
 use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
+use horfimbor_eventsource::helper::create_subscription;
 use horfimbor_eventsource::model_key::ModelKey;
 use horfimbor_eventsource::repository::Repository;
 use horfimbor_eventsource::{Event, Stream};
@@ -24,8 +25,7 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
     let stream = Stream::Event(e.event_name());
     let group_name = "bob";
 
-    repo_state
-        .create_subscription(&stream, group_name)
+    create_subscription(&event_store_db, &stream, group_name)
         .await
         .context("cannot create subscription")?;
 
@@ -48,7 +48,8 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
             .context("cannot extract json")?;
 
         if let TemplateEvent::Delayed(delayed) = json {
-            let key = ModelKey::from(event.stream_id.as_str());
+            let key = ModelKey::try_from(event.stream_id.as_str())
+                .context("cannot convert streamId to ModelKey")?;
 
             tokio::spawn(async move {
                 let now = SystemTime::now();
