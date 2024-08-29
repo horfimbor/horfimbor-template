@@ -13,5 +13,6 @@ target/
 .idea/
 
 /server/web/
+!/server/web/.gitkeep
 /client/dist/
 /.env
