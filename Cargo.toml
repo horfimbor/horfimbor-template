@@ -7,7 +7,6 @@ members = [
     "shared",
     "state"
 ]
-release = false
 
 [workspace.dependencies]
 #horfimbor-eventsource = {path = "../horfimbor-engine/horfimbor-eventsource"}
@@ -22,7 +21,6 @@ thiserror = "1.0"
 eventstore = "3.0"
 uuid = { version = "1.1", features = ["v4", "serde"] }
 dotenvy = "0.15"
-
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
