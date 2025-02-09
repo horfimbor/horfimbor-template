@@ -11,10 +11,7 @@ bounce = "0.9"
 yew = { version= "0.21", features=["csr"] }
 custom-elements = "0.2"
 template-shared = { path = "../shared" }
-console_error_panic_hook = "0.1"
-console_log = "1.0"
 gloo-net = "0.6"
-log = "0.4"
 reqwasm = "0.5"
 weblog = "0.3"
 wasm-bindgen = "0.2"
@@ -25,7 +22,6 @@ futures = "0.3.28"
 [dependencies.web-sys]
 features = ["HtmlInputElement", "InputEvent"]
 version = "0.3"
-
 
 [lints]
 workspace = true

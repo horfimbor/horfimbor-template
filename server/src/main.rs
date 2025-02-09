@@ -1,20 +1,19 @@
-mod controller;
+mod consumer;
+mod web;
 
 #[macro_use]
 extern crate rocket;
 
-use crate::controller::{index, stream_dto, template_command};
+use crate::consumer::delay::compute_delay;
+use crate::consumer::dto::cache_dto;
+use crate::consumer::state::cache_state;
 use anyhow::{Context, Result};
-use clap::Parser;
+use clap::{Parser, Subcommand, ValueEnum};
 use eventstore::Client;
 use horfimbor_eventsource::cache_db::redis::StateDb;
 use horfimbor_eventsource::repository::{DtoRepository, Repository, StateRepository};
-use rocket::fs::{relative, FileServer};
-use rocket::http::Method;
-use rocket::response::content::RawHtml;
-use rocket::response::Redirect;
-use rocket_cors::{AllowedHeaders, AllowedOrigins};
-use rocket_dyn_templates::Template;
+use rocket::futures::future::try_join_all;
+use rocket::futures::FutureExt;
 use std::env;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
@@ -24,6 +23,14 @@ type TemplateRepository = StateRepository<TemplateState, TemplateStateCache>;
 type TemplateDtoCache = StateDb<TemplateDto>;
 type TemplateDtoRepository = DtoRepository<TemplateDto, TemplateDtoCache>;
 type Host = String;
+
+#[derive(Debug, PartialEq, Clone, ValueEnum)]
+enum Service {
+    Web,
+    Delay,
+    State,
+    Dto,
+}
 
 const STREAM_NAME: &str = "template2";
 
@@ -36,6 +43,17 @@ mod built_info {
 struct Args {
     #[arg(short, long, default_value_t = false)]
     real_env: bool,
+
+    #[clap(subcommand)]
+    command: Command,
+}
+
+#[derive(Debug, Subcommand)]
+enum Command {
+    Service {
+        #[arg(long)]
+        list: Vec<Service>,
+    },
 }
 
 #[rocket::main]
@@ -51,13 +69,6 @@ async fn main() -> Result<()> {
         .parse()
         .context("fail to parse the settings")?;
 
-    let auth_port = env::var("APP_PORT")
-        .context("APP_PORT is not defined")?
-        .parse::<u16>()
-        .context("APP_PORT cannot be parse in u16")?;
-    let auth_host = env::var("APP_HOST").context("APP_HOST is not defined")?;
-    let host: Host = auth_host.clone();
-
     let redis_client =
         redis::Client::open(env::var("REDIS_URI").context("fail to get REDIS_URI env var")?)?;
 
@@ -70,57 +81,37 @@ async fn main() -> Result<()> {
 
     let dto_redis = TemplateDtoCache::new(redis_client.clone());
 
-    let repo_dto = TemplateDtoRepository::new(event_store_db, dto_redis.clone());
+    let repo_dto = TemplateDtoRepository::new(event_store_db.clone(), dto_redis.clone());
 
-    let allowed_origins = AllowedOrigins::some_exact(&[auth_host]);
+    match args.command {
+        Command::Service { list } => {
+            let mut services = Vec::new();
 
-    let cors = rocket_cors::CorsOptions {
-        allowed_origins,
-        allowed_methods: vec![Method::Get, Method::Post]
-            .into_iter()
-            .map(From::from)
-            .collect(),
-        allowed_headers: AllowedHeaders::all(),
-        allow_credentials: true,
-        ..Default::default()
+            if list.is_empty() || list.contains(&Service::Web) {
+                services.push(
+                    web::start_server(repo_state, repo_dto, dto_redis, redis_client.clone())
+                        .boxed(),
+                );
+            }
+
+            if list.is_empty() || list.contains(&Service::Delay) {
+                services.push(compute_delay(redis_client.clone(), event_store_db.clone()).boxed());
+            }
+
+            if list.is_empty() || list.contains(&Service::Dto) {
+                services.push(cache_dto(redis_client.clone(), event_store_db.clone()).boxed());
+            }
+
+            if list.is_empty() || list.contains(&Service::State) {
+                services.push(cache_state(redis_client, event_store_db).boxed());
+            }
+
+            dbg!(services.len());
+
+            try_join_all(services)
+                .await
+                .map(|_| ())
+                .context("some service failed")
+        }
     }
-    .to_cors()
-    .context("fail to create cors")?;
-
-    let figment = rocket::Config::figment()
-        .merge(("port", auth_port))
-        .merge(("address", "0.0.0.0"))
-        .merge(("template_dir", "server/templates"));
-    let _rocket = rocket::custom(figment)
-        .manage(repo_state)
-        .manage(repo_dto)
-        .manage(dto_redis)
-        .manage(host)
-        .mount("/", routes![index, redirect_index_js])
-        .mount("/api", routes![template_command, stream_dto])
-        .mount("/", FileServer::from(relative!("web")))
-        .attach(cors)
-        .attach(Template::fairing())
-        .register("/", catchers![general_not_found])
-        .launch()
-        .await;
-
-    Ok(())
-}
-
-#[get("/template/index.js")]
-fn redirect_index_js() -> Redirect {
-    Redirect::temporary(format!(
-        "/template/index-v{}.js",
-        built_info::PKG_VERSION.replace('.', "-")
-    ))
-}
-
-#[catch(404)]
-fn general_not_found() -> RawHtml<&'static str> {
-    RawHtml(
-        r"
-        <p>Hmm... This is not the droïd you are looking for, oupsi</p>
-    ",
-    )
 }
