@@ -1,11 +1,15 @@
 set shell := ["bash", "-uc"]
 set dotenv-load
 
-startup:
-    docker compose up -d
+dc-start *SRV:
+    docker compose up -d --build --force-recreate {{SRV}}
 
-stop:
+dc-stop:
     docker compose down
+
+dc-reset:
+    docker compose down -v
+    just dc-start
 
 watch-client:
     cargo watch -w client -w shared -- \

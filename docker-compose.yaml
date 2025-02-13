@@ -1,6 +1,20 @@
-version: "3.4"
-
 services:
+
+  template:
+    build:
+      args:
+        - WASM_TAG=v0.1.0
+      target: final-server
+      context: .
+
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_PORT=8000
+      - APP_HOST=http://template.localhost:8000
+      - EVENTSTORE_URI=esdb://admin:changeit@eventstore:2113?tls=false&tlsVerifyCert=false
+      - REDIS_URI=redis://redis:6379/
+    command: template-server --real-env service
 
   eventstore:
     image: eventstore/eventstore:24.2.0-bookworm-slim

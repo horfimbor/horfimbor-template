@@ -7,13 +7,15 @@ extern crate rocket;
 use crate::consumer::delay::compute_delay;
 use crate::consumer::dto::cache_dto;
 use crate::consumer::state::cache_state;
-use anyhow::{Context, Result};
+use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use eventstore::Client;
 use horfimbor_eventsource::cache_db::redis::StateDb;
 use horfimbor_eventsource::repository::{DtoRepository, Repository, StateRepository};
 use rocket::futures::future::try_join_all;
-use rocket::futures::FutureExt;
+use rocket::futures::{FutureExt, StreamExt};
+use signal_hook::consts::signal::*;
+use signal_hook_tokio::Signals;
 use std::env;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
@@ -50,6 +52,10 @@ struct Args {
 
 #[derive(Debug, Subcommand)]
 enum Command {
+    Cli {
+        #[arg(long)]
+        hello: String,
+    },
     Service {
         #[arg(long)]
         list: Vec<Service>,
@@ -105,6 +111,10 @@ async fn main() -> Result<()> {
             if list.is_empty() || list.contains(&Service::State) {
                 services.push(cache_state(redis_client, event_store_db).boxed());
             }
+            let signals = Signals::new([SIGTERM, SIGINT, SIGQUIT])?;
+
+            let signals_task = handle_signals(signals).boxed();
+            services.push(signals_task);
 
             dbg!(services.len());
 
@@ -113,5 +123,17 @@ async fn main() -> Result<()> {
                 .map(|_| ())
                 .context("some service failed")
         }
+        Command::Cli { hello } => {
+            println!("hello {hello} !");
+            Ok(())
+        }
     }
+}
+
+async fn handle_signals(mut signals: Signals) -> Result<()> {
+    if signals.next().await.is_some() {
+        bail!("Exit required")
+    }
+
+    Ok(())
 }

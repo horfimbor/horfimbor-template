@@ -22,6 +22,10 @@ anyhow.workspace = true
 chrono = "0.4"
 dotenvy.workspace = true
 tokio = "1.43"
+signal-hook-tokio = { version = "0.3", features = ["futures-v0_3"] }
+signal-hook = "0.3"
+futures = "0.3"
+
 
 
 [dependencies.rocket_dyn_templates]
