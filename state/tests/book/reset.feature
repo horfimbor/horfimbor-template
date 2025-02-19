@@ -9,4 +9,4 @@ Feature: Template example
     Given a template
     When i try to reset it
     When i try to reset it
-    Then it got a error
+    Then it got an error

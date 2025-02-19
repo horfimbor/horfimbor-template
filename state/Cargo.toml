@@ -14,7 +14,6 @@ template-shared = { path = "../shared", features = ["server"] }
 
 [dev-dependencies]
 tokio = { version = "1.21", features = ["rt", "rt-multi-thread", "macros"] }
-async-trait = "0.1"
 cucumber = { version = "0.21.1" }
 anyhow.workspace = true
 

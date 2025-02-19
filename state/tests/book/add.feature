@@ -8,4 +8,4 @@ Feature: Template example
   Scenario: i can add too much
     Given a template
     When i try to add 50000
-    Then it got a error
+    Then it got an error

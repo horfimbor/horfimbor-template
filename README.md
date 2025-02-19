@@ -20,6 +20,7 @@ install tools :
 cargo install just
 cargo install wasm-pack
 cargo install cargo-watch
+cargo install cargo-mutants
 ```
 
 create the client :

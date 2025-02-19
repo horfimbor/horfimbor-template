@@ -20,6 +20,22 @@ impl TemplateState {
     pub fn get_value(&self) -> usize {
         self.value
     }
+
+    #[cfg(debug_assertions)]
+    pub fn delayed(&self) -> &Vec<Delayed> {
+        &self.delayed
+    }
+
+    #[cfg(debug_assertions)]
+    pub fn time_pass(&mut self, nb: u64) {
+        for delay in &mut self.delayed {
+            delay.timestamp -= nb;
+        }
+    }
+    #[cfg(debug_assertions)]
+    pub fn get_id(&self, nb: usize) -> usize {
+        self.delayed[nb].id
+    }
 }
 
 impl Default for TemplateState {

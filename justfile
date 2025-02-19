@@ -26,3 +26,7 @@ precommit:
     cargo fmt
     cargo clippy -- -D clippy::expect_used -D clippy::panic  -D clippy::unwrap_used
     cargo test
+
+test-mutation:
+    cargo test
+    cargo mutants -p template-state
