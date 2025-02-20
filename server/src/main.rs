@@ -7,7 +7,7 @@ extern crate rocket;
 use crate::consumer::delay::compute_delay;
 use crate::consumer::dto::cache_dto;
 use crate::consumer::state::cache_state;
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use clap::{Parser, Subcommand, ValueEnum};
 use eventstore::Client;
 use horfimbor_eventsource::cache_db::redis::StateDb;

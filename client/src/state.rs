@@ -103,7 +103,7 @@ impl Component for TemplateState {
                 true
             }
             DtoMessage::Event(e) => match &mut self.dto {
-                Ok(ref mut dto) => {
+                Ok(dto) => {
                     dto.play_event(&e);
                     true
                 }

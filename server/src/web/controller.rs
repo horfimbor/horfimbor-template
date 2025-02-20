@@ -1,16 +1,16 @@
-use crate::{Host, TemplateDtoCache, TemplateDtoRepository, TemplateRepository, STREAM_NAME};
+use crate::{Host, STREAM_NAME, TemplateDtoCache, TemplateDtoRepository, TemplateRepository};
 use chrono::prelude::*;
+use horfimbor_eventsource::Stream;
 use horfimbor_eventsource::cache_db::CacheDb;
 use horfimbor_eventsource::helper::get_subscription;
 use horfimbor_eventsource::metadata::Metadata;
 use horfimbor_eventsource::model_key::ModelKey;
 use horfimbor_eventsource::repository::Repository;
-use horfimbor_eventsource::Stream;
+use rocket::State;
 use rocket::http::{Cookie, CookieJar};
 use rocket::response::stream::{Event, EventStream};
 use rocket::serde::json::Json;
-use rocket::State;
-use rocket_dyn_templates::{context, Template};
+use rocket_dyn_templates::{Template, context};
 use template_shared::command::TemplateCommand;
 use template_shared::event::TemplateEvent;
 use uuid::Uuid;
@@ -43,7 +43,7 @@ fn get_uuid_from_cookies(cookies: &CookieJar) -> Result<String, String> {
         Some(crumb) => crumb.to_string(),
     }
     .split('=')
-    .last()
+    .next_back()
     .ok_or("invalid cookie".to_string())?
     .to_string();
 

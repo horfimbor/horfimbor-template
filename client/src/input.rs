@@ -1,5 +1,5 @@
 use bounce::BounceRoot;
-use bounce::{use_atom, Atom};
+use bounce::{Atom, use_atom};
 use reqwasm::http::{Request, Response};
 use web_sys::HtmlInputElement;
 use weblog::console_info;

@@ -1,11 +1,11 @@
 use crate::web::controller::{index, stream_dto, template_command};
-use crate::{built_info, Host, TemplateDtoCache, TemplateDtoRepository, TemplateRepository};
+use crate::{Host, TemplateDtoCache, TemplateDtoRepository, TemplateRepository, built_info};
 use anyhow::{Context, Error};
 use redis::Client as RedisClient;
-use rocket::fs::{relative, FileServer};
+use rocket::fs::{FileServer, relative};
 use rocket::http::Method;
-use rocket::response::content::RawHtml;
 use rocket::response::Redirect;
+use rocket::response::content::RawHtml;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
 use rocket_dyn_templates::Template;
 use std::env;

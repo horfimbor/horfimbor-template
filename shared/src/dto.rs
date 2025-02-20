@@ -1,8 +1,8 @@
 #[cfg(feature = "server")]
 use horfimbor_eventsource::Dto;
 
-use crate::event::TemplateEvent;
 use crate::START_VALUE;
+use crate::event::TemplateEvent;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
