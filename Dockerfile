@@ -7,7 +7,7 @@
 ################################################################################
 # Create a stage for building the application.
 
-ARG RUST_VERSION=1.84.0
+ARG RUST_VERSION=1.85.1
 FROM rust:${RUST_VERSION}-slim-bookworm AS build
 WORKDIR /app
 

@@ -4,6 +4,7 @@ use horfimbor_eventsource::horfimbor_eventsource_derive::Event;
 use horfimbor_eventsource::{Event, EventName};
 use std::fmt::Display;
 
+#[cfg(feature = "server")]
 use crate::TEMPLATE_STATE_NAME;
 
 use serde::{Deserialize, Serialize};

@@ -11,6 +11,11 @@ dc-reset:
     docker compose down -v
     just dc-start
 
+
+alias ff := open
+open:
+    firefox $APP_HOST
+
 watch-client:
     cargo watch -w client -w shared -- \
         wasm-pack build ./client \

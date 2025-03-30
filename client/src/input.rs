@@ -1,5 +1,6 @@
 use bounce::BounceRoot;
 use bounce::{Atom, use_atom};
+use horfimbor_client_derive::WebComponent;
 use reqwasm::http::{Request, Response};
 use web_sys::HtmlInputElement;
 use weblog::console_info;
@@ -9,6 +10,8 @@ use yew::prelude::*;
 use template_shared::command::{Delay, TemplateCommand};
 use template_shared::dto::TemplateDto;
 
+#[derive(WebComponent)]
+#[component(TemplateInput)]
 #[derive(Default, Properties, PartialEq)]
 pub struct TemplateInputProps {
     pub endpoint: String,

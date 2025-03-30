@@ -3,6 +3,7 @@ use gloo_net::eventsource::futures::EventSource;
 use serde::Deserialize;
 use serde_json::Error;
 use std::time::Duration;
+use horfimbor_client_derive::WebComponent;
 use weblog::console_info;
 use yew::platform::spawn_local;
 use yew::platform::time::sleep;
@@ -26,6 +27,8 @@ pub enum DtoMessage {
     Reconnect,
 }
 
+#[derive(WebComponent)]
+#[component(TemplateState)]
 #[derive(Default, Properties, PartialEq)]
 pub struct TemplateStateProps {
     pub endpoint: String,
