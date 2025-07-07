@@ -9,7 +9,7 @@ edition = "2024"
 horfimbor-eventsource.workspace = true
 clap.workspace = true
 serde.workspace = true
-eventstore.workspace = true
+kurrentdb.workspace = true
 uuid.workspace = true
 thiserror.workspace = true
 template-shared = { path = "../shared", features = ["server"] }

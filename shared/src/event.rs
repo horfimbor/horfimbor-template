@@ -38,6 +38,6 @@ impl Display for TemplateEvent {
             Self::Delayed(_) => "~~~".to_string(),
             Self::DelayDone(_) => "~!~".to_string(),
         };
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }

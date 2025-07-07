@@ -1,8 +1,8 @@
 use crate::{STREAM_NAME, TemplateRepository, TemplateStateCache};
 use anyhow::Result;
-use eventstore::Client;
 use horfimbor_eventsource::Stream;
 use horfimbor_eventsource::repository::Repository;
+use kurrentdb::Client;
 use redis::Client as Redis;
 
 const GROUP_NAME: &str = "state";

@@ -7,11 +7,11 @@ extern crate rocket;
 use crate::consumer::delay::compute_delay;
 use crate::consumer::dto::cache_dto;
 use crate::consumer::state::cache_state;
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
-use eventstore::Client;
 use horfimbor_eventsource::cache_db::redis::StateDb;
 use horfimbor_eventsource::repository::{DtoRepository, Repository, StateRepository};
+use kurrentdb::Client;
 use rocket::futures::future::try_join_all;
 use rocket::futures::{FutureExt, StreamExt};
 use signal_hook::consts::signal::*;
@@ -78,7 +78,8 @@ async fn main() -> Result<()> {
     let redis_client =
         redis::Client::open(env::var("REDIS_URI").context("fail to get REDIS_URI env var")?)?;
 
-    let event_store_db = Client::new(settings).context("fail to connect to eventstore db")?;
+    let event_store_db =
+        Client::new(settings).map_err(|e| anyhow!(" cannot connect to eventstore : {e}"))?;
 
     let repo_state = TemplateRepository::new(
         event_store_db.clone(),

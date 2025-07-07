@@ -1,9 +1,9 @@
 use futures::StreamExt;
 use gloo_net::eventsource::futures::EventSource;
+use horfimbor_client_derive::WebComponent;
 use serde::Deserialize;
 use serde_json::Error;
 use std::time::Duration;
-use horfimbor_client_derive::WebComponent;
 use weblog::console_info;
 use yew::platform::spawn_local;
 use yew::platform::time::sleep;

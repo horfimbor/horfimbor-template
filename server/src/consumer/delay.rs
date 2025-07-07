@@ -1,10 +1,10 @@
 use crate::{TemplateRepository, TemplateStateCache};
 use anyhow::{Context, Error, Result};
-use eventstore::{Client, SubscribeToPersistentSubscriptionOptions};
 use horfimbor_eventsource::helper::create_subscription;
 use horfimbor_eventsource::model_key::ModelKey;
 use horfimbor_eventsource::repository::Repository;
 use horfimbor_eventsource::{Event, Stream};
+use kurrentdb::{Client, SubscribeToPersistentSubscriptionOptions};
 use redis::Client as Redis;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use template_shared::command::TemplateCommand;
@@ -48,7 +48,7 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
             .context("cannot extract json")?;
 
         if let TemplateEvent::Delayed(delayed) = json {
-            let key = ModelKey::try_from(event.stream_id.as_str())
+            let key = ModelKey::try_from(event.stream_id())
                 .context("cannot convert streamId to ModelKey")?;
 
             tokio::spawn(async move {
@@ -74,6 +74,6 @@ pub async fn compute_delay(redis_client: Redis, event_store_db: Client) -> Resul
                 Ok::<(), Error>(())
             });
         }
-        sub.ack(rcv_event).await.context("cannot ack")?;
+        sub.ack(&rcv_event).await.context("cannot ack")?;
     }
 }
