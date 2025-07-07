@@ -199,6 +199,7 @@ fn reset(props: &TemplateInputProps) -> Html {
     html! { <button id="btn-reset" onclick={on_reset_clicked}>{"Reset"}</button> }
 }
 
+#[allow(dead_code)]
 #[derive(PartialEq, Atom, Default)]
 struct State {
     content: TemplateDto,
