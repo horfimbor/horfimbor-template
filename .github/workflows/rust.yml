@@ -25,6 +25,8 @@ jobs:
       - name: Build project
         run: |
           mkdir artifact
+          RUN apt update && apt install -y pkg-config ca-certificates libsasl2-dev libssl-dev
+          RUN cargo install wasm-pack
           cargo build --locked --release --bin template-server
           cp ./target/release/template-server ./artifact/template-server
           wasm-pack build ./client --target web --out-dir ./artifact/web/template/ --out-name index-$WASM_TAG
