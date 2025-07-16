@@ -22,3 +22,15 @@ jobs:
         run: cargo test -p template-state --test template-state-test
       - name: Run clippy
         run: cargo clippy -- -D clippy::expect_used -D clippy::panic  -D clippy::unwrap_used
+      - name: Build project
+        run: |
+          mkdir artifact
+          cargo build --locked --release --bin template-server
+          cp ./target/release/template-server ./artifact/template-server
+          wasm-pack build ./client --target web --out-dir ./artifact/web/template/ --out-name index-$WASM_TAG
+          cp ./server/templates ./artifact/templates
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ubuntu-binary
+          path: artifact/
+          if-no-files-found: error
