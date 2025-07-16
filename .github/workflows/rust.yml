@@ -30,7 +30,7 @@ jobs:
           cargo build --locked --release --bin template-server
           cp ./target/release/template-server ./artifact/template-server
           wasm-pack build ./client --target web --out-dir ./artifact/static/web/template/ --out-name index-$WASM_TAG
-          cp ./server/templates ./artifact/static/templates
+          cp -r ./server/templates ./artifact/static/templates
       - uses: actions/upload-artifact@v4
         with:
           name: ubuntu-binary
