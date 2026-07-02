@@ -2,6 +2,7 @@ use crate::{STREAM_NAME, TemplateRepository, TemplateStateCache};
 use anyhow::Result;
 use horfimbor_eventsource::Stream;
 use horfimbor_eventsource::repository::Repository;
+use horfimbor_eventsource::repository::StateRepositoryConstructor;
 use kurrentdb::Client;
 use redis::Client as Redis;
 

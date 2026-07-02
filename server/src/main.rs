@@ -4,19 +4,25 @@ mod web;
 #[macro_use]
 extern crate rocket;
 
-use crate::consumer::delay::compute_delay;
-use crate::consumer::dto::cache_dto;
+use crate::consumer::delay::{handle_delay, resolve_delay};
+use crate::consumer::dto::{CACHE_PREFIX, cache_dto};
 use crate::consumer::state::cache_state;
 use anyhow::{Context, Result, anyhow, bail};
 use clap::{Parser, Subcommand, ValueEnum};
+use horfimbor_callback_recall::database::sqlite::open;
+use horfimbor_callback_recall::{SchedulerBuilder, SchedulerListener};
 use horfimbor_eventsource::cache_db::redis::StateDb;
-use horfimbor_eventsource::repository::{DtoRepository, Repository, StateRepository};
+use horfimbor_eventsource::repository::{
+    DtoRepository, DtoRepositoryConstructor, RepositoryKind, StateRepository,
+    StateRepositoryConstructor,
+};
 use kurrentdb::Client;
 use rocket::futures::future::try_join_all;
 use rocket::futures::{FutureExt, StreamExt};
 use signal_hook::consts::signal::*;
 use signal_hook_tokio::Signals;
 use std::env;
+use std::time::Duration;
 use template_shared::dto::TemplateDto;
 use template_state::TemplateState;
 
@@ -34,7 +40,7 @@ enum Service {
     Dto,
 }
 
-const STREAM_NAME: &str = "template2";
+const STREAM_NAME: &str = "tpl";
 
 mod built_info {
     include!(concat!(env!("OUT_DIR"), "/built.rs"));
@@ -88,7 +94,26 @@ async fn main() -> Result<()> {
 
     let dto_redis = TemplateDtoCache::new(redis_client.clone());
 
-    let repo_dto = TemplateDtoRepository::new(event_store_db.clone(), dto_redis.clone());
+    let repo_dto = TemplateDtoRepository::new(
+        event_store_db.clone(),
+        dto_redis.clone(),
+        RepositoryKind::Dto(CACHE_PREFIX),
+    );
+
+    let template_repository = TemplateRepository::new(
+        event_store_db.clone(),
+        TemplateStateCache::new(redis_client.clone()),
+    );
+
+    let db = open("schedule").await.context("cannot create sqlite db")?;
+
+    let mut builder = SchedulerBuilder::new(db, Duration::from_secs(2))
+        .await
+        .context("cannot create builder")?;
+
+    let event_name = resolve_delay(&template_repository, &mut builder);
+
+    let (emitter, listener) = builder.start();
 
     match args.command {
         Command::Service { list } => {
@@ -102,8 +127,10 @@ async fn main() -> Result<()> {
             }
 
             if list.is_empty() || list.contains(&Service::Delay) {
-                services.push(compute_delay(redis_client.clone(), event_store_db.clone()).boxed());
+                services.push(handle_delay(event_store_db.clone(), emitter, event_name).boxed());
             }
+
+            services.push(join_error(listener).boxed());
 
             if list.is_empty() || list.contains(&Service::Dto) {
                 services.push(cache_dto(redis_client.clone(), event_store_db.clone()).boxed());
@@ -129,6 +156,12 @@ async fn main() -> Result<()> {
             Ok(())
         }
     }
+}
+
+async fn join_error(l: SchedulerListener) -> Result<(), anyhow::Error> {
+    l.join().await;
+
+    Ok(())
 }
 
 async fn handle_signals(mut signals: Signals) -> Result<()> {

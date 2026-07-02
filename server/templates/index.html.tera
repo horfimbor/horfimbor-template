@@ -10,6 +10,11 @@
     }
     main();
     </script>
+    <style>
+        fieldset {
+            min-height: 100px;
+        }
+    </style>
 </head>
 <body>
     {% include "template_render" %}

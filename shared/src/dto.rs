@@ -53,7 +53,7 @@ impl TemplateDto {
     }
     #[must_use]
     pub fn average(&self) -> f32 {
-        self.average
+        (self.average * 100.0).round() / 100.0
     }
 }
 

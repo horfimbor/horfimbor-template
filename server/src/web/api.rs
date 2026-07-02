@@ -1,32 +1,31 @@
-use crate::{Host, STREAM_NAME, TemplateDtoCache, TemplateDtoRepository, TemplateRepository};
-use chrono::prelude::*;
+use crate::consumer::dto::CACHE_PREFIX;
+use crate::{STREAM_NAME, TemplateDtoCache, TemplateDtoRepository, TemplateRepository};
 use horfimbor_eventsource::Stream;
 use horfimbor_eventsource::cache_db::CacheDb;
 use horfimbor_eventsource::helper::get_subscription;
 use horfimbor_eventsource::metadata::Metadata;
 use horfimbor_eventsource::model_key::ModelKey;
 use horfimbor_eventsource::repository::Repository;
-use rocket::State;
-use rocket::http::{Cookie, CookieJar};
 use rocket::response::stream::{Event, EventStream};
 use rocket::serde::json::Json;
-use rocket_dyn_templates::{Template, context};
+use rocket::{Route, State};
 use template_shared::command::TemplateCommand;
 use template_shared::event::TemplateEvent;
 use uuid::Uuid;
 
-#[post("/", format = "json", data = "<command>")]
-pub async fn template_command(
-    state_repository: &State<TemplateRepository>,
-    cookies: &CookieJar<'_>,
-    command: Json<TemplateCommand>,
-) -> Result<(), String> {
-    let uuid = get_uuid_from_cookies(cookies)?;
+pub fn routes() -> Vec<Route> {
+    routes![template_command, stream_dto]
+}
 
-    let key = ModelKey::new(
-        STREAM_NAME,
-        uuid.parse().map_err(|e: uuid::Error| e.to_string())?,
-    );
+#[post("/input/<id>", format = "json", data = "<command>")]
+async fn template_command(
+    state_repository: &State<TemplateRepository>,
+    command: Json<TemplateCommand>,
+    id: &str,
+) -> Result<(), String> {
+    let uuid: Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
+
+    let key = ModelKey::new(STREAM_NAME, uuid);
     state_repository
         .add_command(&key, command.0, None)
         .await
@@ -35,41 +34,21 @@ pub async fn template_command(
     Ok(())
 }
 
-fn get_uuid_from_cookies(cookies: &CookieJar) -> Result<String, String> {
-    let uuid = match cookies.get("uuid") {
-        None => {
-            return Err("no cookies".to_string());
-        }
-        Some(crumb) => crumb.to_string(),
-    }
-    .split('=')
-    .next_back()
-    .ok_or("invalid cookie".to_string())?
-    .to_string();
-
-    Ok(uuid)
-}
-
-#[get("/data")]
-pub async fn stream_dto(
+#[get("/data/<id>")]
+async fn stream_dto(
     dto_redis: &State<TemplateDtoCache>,
     dto_repository: &State<TemplateDtoRepository>,
-    cookies: &CookieJar<'_>,
+    id: &str,
 ) -> Result<EventStream![], String> {
-    let uuid = match get_uuid_from_cookies(cookies) {
-        Ok(value) => value.parse().map_err(|e: uuid::Error| e.to_string())?,
-        Err(_) => {
-            let uuid = Uuid::new_v4();
-            cookies.add(Cookie::new("uuid", uuid.to_string()));
-            uuid
-        }
-    };
+    let uuid: Uuid = id.parse().map_err(|e: uuid::Error| e.to_string())?;
 
     let key = ModelKey::new(STREAM_NAME, uuid);
     let dto = dto_redis
-        .get(&key)
-        .map_err(|e| e.to_string())
-        .map_err(|_| "cannot find the dto".to_string())?;
+        .get(Some(CACHE_PREFIX), &key)
+        // .get(None, &key)
+        .map_err(|e| format!("cannot find the dto{e}"))?;
+
+    dbg!(&dto);
 
     let mut subscription = get_subscription(
         dto_repository.event_db(),
@@ -110,16 +89,4 @@ pub async fn stream_dto(
             }
         }
     })
-}
-
-#[get("/")]
-pub async fn index(host: &State<Host>) -> Template {
-    let local: DateTime<Local> = Local::now();
-    Template::render(
-        "index",
-        context! {
-            title: format!("Hello, world! {}",local.format("%x %T")),
-            endpoint: format!("{host}/api/" )
-        },
-    )
 }
