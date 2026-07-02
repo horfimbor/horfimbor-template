@@ -1,16 +1,18 @@
-use crate::web::controller::{index, stream_dto, template_command};
 use crate::{Host, TemplateDtoCache, TemplateDtoRepository, TemplateRepository, built_info};
 use anyhow::{Context, Error};
+use chrono::{DateTime, Local};
 use redis::Client as RedisClient;
+use rocket::State;
 use rocket::fs::{FileServer, relative};
 use rocket::http::Method;
 use rocket::response::Redirect;
 use rocket::response::content::RawHtml;
 use rocket_cors::{AllowedHeaders, AllowedOrigins};
-use rocket_dyn_templates::Template;
+use rocket_dyn_templates::{Template, context};
 use std::env;
+use uuid::Uuid;
 
-pub mod controller;
+mod api;
 
 pub async fn start_server(
     repo_state: TemplateRepository,
@@ -51,7 +53,7 @@ pub async fn start_server(
         .manage(host)
         .manage(dto_cache)
         .mount("/", routes![index, redirect_index_js])
-        .mount("/api", routes![template_command, stream_dto])
+        .mount("/api", api::routes())
         .mount("/", FileServer::from(relative!("web")))
         .attach(cors)
         .attach(Template::fairing())
@@ -60,6 +62,22 @@ pub async fn start_server(
         .await;
 
     Ok(())
+}
+
+#[get("/")]
+async fn index(host: &State<Host>) -> Template {
+    let local: DateTime<Local> = Local::now();
+
+    let id = Uuid::new_v4();
+
+    Template::render(
+        "index",
+        context! {
+            title: format!("Hello, world! {}",local.format("%x %T")),
+            endpoint: format!("{host}/api/" ),
+            id: id
+        },
+    )
 }
 
 #[get("/template/index.js")]

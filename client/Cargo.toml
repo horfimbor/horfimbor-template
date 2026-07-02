@@ -8,13 +8,14 @@ crate-type = ["rlib", "cdylib"]
 
 [dependencies]
 horfimbor-client-derive = "0.1"
+horfimbor-client = "0.1"
 #horfimbor-client-derive = { path = "../../horfimbor-engine/horfimbor-client-derive" }
+#horfimbor-client = { path = "../../horfimbor-engine/horfimbor-client" }
 
-bounce = "0.9"
-yew = { version= "0.21", features=["csr"] }
+yew = { version= "0.23", features=["csr"] }
 custom-elements = "0.2"
 template-shared = { path = "../shared" }
-gloo-net = "0.6"
+gloo-net = "0.7"
 reqwasm = "0.5"
 weblog = "0.3"
 wasm-bindgen = "0.2"

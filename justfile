@@ -1,6 +1,9 @@
 set shell := ["bash", "-uc"]
 set dotenv-load
 
+dc-db:
+    just dc-start eventstore redis
+
 dc-start *SRV:
     docker compose up -d --build --force-recreate {{SRV}}
 
